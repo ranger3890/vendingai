@@ -1,4 +1,4 @@
-[face-scan.html](https://github.com/user-attachments/files/26042147/face-scan.html)
+[face-scan.html](https://github.com/user-attachments/files/26042190/face-scan.html)
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,7 +29,7 @@ h1 {
   margin-bottom: 0.3rem;
 }
 .sub { color: var(--dim); font-size: 0.72rem; letter-spacing: 0.18em;
-  text-transform: uppercase; margin-bottom: 2rem; }
+  text-transform: uppercase; margin-bottom: 1rem; }
 .wrapper {
   position: relative; display: inline-block;
   border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
@@ -50,7 +50,7 @@ h1 {
   background: linear-gradient(90deg, transparent, var(--accent), transparent);
   opacity: 0.5; animation: scan 3s linear infinite; pointer-events:none; z-index:5; }
 @keyframes scan { 0%{top:0%} 100%{top:100%} }
-.controls { margin-top:1.5rem; display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; }
+.controls { margin-top:1.2rem; display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; }
 button {
   font-family: inherit; font-size:0.78rem; font-weight:700;
   letter-spacing:0.12em; text-transform:uppercase; padding:0.65rem 1.6rem;
@@ -70,16 +70,40 @@ button:disabled::before { display:none; }
   text-align:center; min-height:3rem; text-shadow:0 0 20px rgba(0,255,224,0.4);
 }
 #count span { font-size:0.8rem; color:var(--dim); display:block; margin-top:-0.4rem; }
-#status { margin-top:0.6rem; font-size:0.72rem; letter-spacing:0.1em; color:var(--dim); text-align:center; }
+#status { margin-top:0.5rem; font-size:0.72rem; letter-spacing:0.1em; color:var(--dim); text-align:center; }
 #status.ok { color: var(--accent); }
 #status.error { color: var(--accent2); }
-#debug {
-  margin-top: 0.5rem; max-width: 640px; width: 100%;
-  font-size: 0.64rem; color: #ff6b6b; text-align: center;
-  min-height: 1rem; letter-spacing: 0.05em; line-height: 1.6;
+
+/* ── diagnostic panel — always visible ── */
+#diag {
+  margin-top: 0.8rem; width: min(640px, 100%);
+  border: 1px solid #2a2a3a; border-radius: 4px; overflow: hidden;
+  font-size: 0.65rem; letter-spacing: 0.06em;
 }
+#diag-title {
+  background: rgba(255,255,255,0.03); padding: 0.4rem 0.8rem;
+  color: var(--dim); border-bottom: 1px solid #2a2a3a;
+  font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.14em;
+}
+#diag-body { padding: 0.5rem 0.8rem; display: flex; flex-direction: column; gap: 0.3rem; }
+.drow { display: flex; justify-content: space-between; gap: 1rem; }
+.drow .dk { color: #555570; }
+.drow .dv { color: #e8e8f0; }
+.drow .dv.ok  { color: #00ffe0; }
+.drow .dv.err { color: #ff3cac; }
+.drow .dv.warn{ color: #ffe600; }
+#diag-log {
+  margin-top: 0.3rem; border-top: 1px solid #1a1a2a;
+  padding: 0.4rem 0.8rem; max-height: 80px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 0.15rem;
+}
+.dlog { font-size: 0.6rem; color: #555570; }
+.dlog.info { color: #00ffe0; }
+.dlog.warn { color: #ffe600; }
+.dlog.err  { color: #ff3cac; }
+
 #items-panel {
-  margin-top: 1.4rem; width: min(640px, 100%);
+  margin-top: 1rem; width: min(640px, 100%);
   border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
 }
 #items-panel h2 {
@@ -88,26 +112,20 @@ button:disabled::before { display:none; }
   border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02);
   display: flex; justify-content: space-between; align-items: center;
 }
-#items-panel h2 .model-badge { font-size: 0.58rem; color: #444466; letter-spacing: 0.08em; }
-#items-grid {
-  display: flex; flex-wrap: wrap; gap: 0.5rem;
-  padding: 0.8rem 1rem; min-height: 52px;
-}
-#items-grid:empty::after {
-  content: 'No items detected yet.'; color: var(--dim); font-size: 0.68rem;
-}
+#items-panel h2 .model-badge { font-size: 0.58rem; color: #444466; }
+#items-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.8rem 1rem; min-height: 52px; }
+#items-grid:empty::after { content: 'No items detected yet.'; color: var(--dim); font-size: 0.68rem; }
 .item-chip {
   display: flex; align-items: center; gap: 0.4rem;
   padding: 0.25rem 0.7rem; border-radius: 2px; font-size: 0.68rem;
-  border: 1px solid; white-space: nowrap;
-  animation: chipIn 0.25s ease;
+  border: 1px solid; white-space: nowrap; animation: chipIn 0.25s ease;
 }
 @keyframes chipIn { from { opacity:0; transform:scale(0.92); } to { opacity:1; transform:none; } }
 .item-chip .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .item-chip .cat { opacity: 0.55; font-size: 0.58rem; margin-left: 0.2rem; }
 .item-chip .conf { opacity: 0.45; font-size: 0.58rem; }
 #notif-log {
-  margin-top: 1.5rem; width: min(480px, 100%);
+  margin-top: 1rem; width: min(480px, 100%);
   border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
 }
 #notif-log h2 {
@@ -115,7 +133,7 @@ button:disabled::before { display:none; }
   color: var(--dim); padding: 0.6rem 1rem;
   border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02);
 }
-#notif-list { max-height: 140px; overflow-y: auto; padding: 0.4rem 0; }
+#notif-list { max-height: 120px; overflow-y: auto; padding: 0.4rem 0; }
 #notif-list:empty::after {
   content: 'No alerts sent yet.'; display: block; text-align: center;
   color: var(--dim); font-size: 0.68rem; padding: 0.8rem;
@@ -123,8 +141,7 @@ button:disabled::before { display:none; }
 .notif-item {
   display: flex; justify-content: space-between; align-items: center;
   padding: 0.35rem 1rem; font-size: 0.68rem;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  animation: fadeIn 0.3s ease;
+  border-bottom: 1px solid rgba(255,255,255,0.04); animation: fadeIn 0.3s ease;
 }
 @keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:none; } }
 .notif-item .msg { color: var(--accent); }
@@ -152,8 +169,24 @@ button:disabled::before { display:none; }
 </div>
 
 <div id="count"></div>
-<div id="status" class="ok">Loading models…</div>
-<div id="debug"></div>
+<div id="status" class="ok">Initialising…</div>
+
+<!-- always-visible diagnostic panel -->
+<div id="diag">
+  <div id="diag-title">⚙ Diagnostics</div>
+  <div id="diag-body">
+    <div class="drow"><span class="dk">TF.js</span>        <span class="dv" id="d-tf">—</span></div>
+    <div class="drow"><span class="dk">Face model</span>   <span class="dv" id="d-face">—</span></div>
+    <div class="drow"><span class="dk">Object model</span> <span class="dv" id="d-obj">—</span></div>
+    <div class="drow"><span class="dk">Canvas size</span>  <span class="dv" id="d-canvas">—</span></div>
+    <div class="drow"><span class="dk">Snap canvas</span>  <span class="dv" id="d-snap">—</span></div>
+    <div class="drow"><span class="dk">Frames run</span>   <span class="dv" id="d-frames">0</span></div>
+    <div class="drow"><span class="dk">Last faces</span>   <span class="dv" id="d-faces">—</span></div>
+    <div class="drow"><span class="dk">Last objects</span> <span class="dv" id="d-objs">—</span></div>
+    <div class="drow"><span class="dk">Last error</span>   <span class="dv err" id="d-err">none</span></div>
+  </div>
+  <div id="diag-log"></div>
+</div>
 
 <div id="items-panel">
   <h2>🔍 Detected Items <span class="model-badge">COCO-SSD · 80 classes</span></h2>
@@ -169,42 +202,58 @@ button:disabled::before { display:none; }
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <script>
+/* ── DOM refs ── */
 const video     = document.getElementById('v');
 const overlayC  = document.getElementById('oc');
 const ctx       = overlayC.getContext('2d');
 const statusEl  = document.getElementById('status');
 const countEl   = document.getElementById('count');
-const debugEl   = document.getElementById('debug');
 const startBtn  = document.getElementById('startBtn');
 const stopBtn   = document.getElementById('stopBtn');
 const notifList = document.getElementById('notif-list');
 const itemsGrid = document.getElementById('items-grid');
 
+/* ── diagnostic refs ── */
+const dTf      = document.getElementById('d-tf');
+const dFace    = document.getElementById('d-face');
+const dObj     = document.getElementById('d-obj');
+const dCanvas  = document.getElementById('d-canvas');
+const dSnap    = document.getElementById('d-snap');
+const dFrames  = document.getElementById('d-frames');
+const dFaces   = document.getElementById('d-faces');
+const dObjs    = document.getElementById('d-objs');
+const dErr     = document.getElementById('d-err');
+const diagLog  = document.getElementById('diag-log');
+
+function dset(el, text, cls) {
+  el.textContent = text;
+  el.className = 'dv' + (cls ? ' ' + cls : '');
+}
+function dlog(msg, cls = '') {
+  const d = document.createElement('div');
+  d.className = 'dlog ' + cls;
+  d.textContent = new Date().toLocaleTimeString() + ' — ' + msg;
+  diagLog.prepend(d);
+}
+
+/* ── state ── */
 let stream = null, running = false, animId = null;
 let faceReady = false, objReady = false, cocoModel = null;
 let lastNotifTime = 0, frameCount = 0;
 let lastObjDetections = [];
 
-// Off-screen canvas used as the detection source.
-// We draw each video frame into this ourselves — this avoids
-// the CORS/tainted-canvas issue that silently breaks detection
-// when passing the <video> element directly to the models.
+// Off-screen canvas — models read from this instead of the live <video>
+// element, which can silently fail on managed Chromebooks due to
+// security policies around canvas.drawImage(videoElement).
 const snapCanvas = document.createElement('canvas');
 const snapCtx    = snapCanvas.getContext('2d');
 
 const NTFY_TOPIC     = 'myfacealert123';
 const FACE_MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
 
-/* ── debug display (visible on page, not just console) ── */
-function dbg(msg) {
-  console.warn('[SCAN]', msg);
-  debugEl.textContent = msg;
-}
-
-/* ── status ── */
+/* ── helpers ── */
 function setStatus(msg, cls = '') { statusEl.textContent = msg; statusEl.className = cls; }
 
-/* ── notification log ── */
 function logNotif(msg, ok = true) {
   const el = document.createElement('div');
   el.className = 'notif-item' + (ok ? '' : ' fail');
@@ -222,7 +271,7 @@ async function sendPhoneAlert(count) {
       method: 'POST', body,
       headers: { 'Title': 'Vending Machine Alert', 'Priority': 'default', 'Tags': 'vending,face,camera' }
     });
-    res.ok ? logNotif(`✅ Alert sent: ${count} face${count > 1 ? 's' : ''} detected`)
+    res.ok ? logNotif(`✅ Alert: ${count} face${count > 1 ? 's' : ''} detected`)
            : logNotif(`❌ ntfy error ${res.status}`, false);
   } catch { logNotif('❌ Could not reach ntfy.sh', false); }
 }
@@ -241,33 +290,21 @@ const CATEGORY_MAP = {
   'traffic light':   { cat: 'Street',      color: '#fdcb6e' },
   'fire hydrant':    { cat: 'Street',      color: '#fdcb6e' },
   'stop sign':       { cat: 'Street',      color: '#fdcb6e' },
-  'parking meter':   { cat: 'Street',      color: '#fdcb6e' },
   bench:             { cat: 'Street',      color: '#fdcb6e' },
   bird:              { cat: 'Animal',      color: '#55efc4' },
   cat:               { cat: 'Animal',      color: '#55efc4' },
   dog:               { cat: 'Animal',      color: '#55efc4' },
   horse:             { cat: 'Animal',      color: '#55efc4' },
-  sheep:             { cat: 'Animal',      color: '#55efc4' },
   cow:               { cat: 'Animal',      color: '#55efc4' },
   elephant:          { cat: 'Animal',      color: '#55efc4' },
   bear:              { cat: 'Animal',      color: '#55efc4' },
-  zebra:             { cat: 'Animal',      color: '#55efc4' },
-  giraffe:           { cat: 'Animal',      color: '#55efc4' },
   backpack:          { cat: 'Bag',         color: '#e17055' },
   umbrella:          { cat: 'Accessory',   color: '#e17055' },
   handbag:           { cat: 'Bag',         color: '#e17055' },
   tie:               { cat: 'Clothing',    color: '#e17055' },
   suitcase:          { cat: 'Bag',         color: '#e17055' },
-  frisbee:           { cat: 'Sports',      color: '#00cec9' },
-  skis:              { cat: 'Sports',      color: '#00cec9' },
-  snowboard:         { cat: 'Sports',      color: '#00cec9' },
   'sports ball':     { cat: 'Sports',      color: '#00cec9' },
-  kite:              { cat: 'Sports',      color: '#00cec9' },
-  'baseball bat':    { cat: 'Sports',      color: '#00cec9' },
-  'baseball glove':  { cat: 'Sports',      color: '#00cec9' },
   skateboard:        { cat: 'Sports',      color: '#00cec9' },
-  surfboard:         { cat: 'Sports',      color: '#00cec9' },
-  'tennis racket':   { cat: 'Sports',      color: '#00cec9' },
   bottle:            { cat: 'Drink',       color: '#fd79a8' },
   'wine glass':      { cat: 'Drink',       color: '#fd79a8' },
   cup:               { cat: 'Drink',       color: '#fd79a8' },
@@ -290,7 +327,6 @@ const CATEGORY_MAP = {
   'potted plant':    { cat: 'Plant',       color: '#6ab04c' },
   bed:               { cat: 'Furniture',   color: '#a29bfe' },
   'dining table':    { cat: 'Furniture',   color: '#a29bfe' },
-  toilet:            { cat: 'Furniture',   color: '#a29bfe' },
   tv:                { cat: 'Electronics', color: '#b084ff' },
   laptop:            { cat: 'Electronics', color: '#b084ff' },
   mouse:             { cat: 'Electronics', color: '#b084ff' },
@@ -307,63 +343,114 @@ const CATEGORY_MAP = {
   vase:              { cat: 'Decor',       color: '#badc58' },
   scissors:          { cat: 'Tool',        color: '#dfe6e9' },
   'teddy bear':      { cat: 'Toy',         color: '#fab1a0' },
-  'hair drier':      { cat: 'Appliance',   color: '#dfe6e9' },
   toothbrush:        { cat: 'Personal',    color: '#dfe6e9' },
 };
 function getCategory(label) {
   return CATEGORY_MAP[label.toLowerCase()] || { cat: 'Object', color: '#aaaaaa' };
 }
 
-/* ── model loading ── */
+/* ════════════════════════════════════════
+   MODEL LOADING — with full diagnostics
+════════════════════════════════════════ */
+
+// Check TF.js loaded at all
+if (typeof tf === 'undefined') {
+  dset(dTf, 'NOT LOADED — CDN blocked?', 'err');
+  dlog('TensorFlow.js did not load. CDN may be blocked by school network.', 'err');
+} else {
+  dset(dTf, 'v' + tf.version.tfjs + ' ✓', 'ok');
+  dlog('TF.js loaded: ' + tf.version.tfjs, 'info');
+}
+
+if (typeof faceapi === 'undefined') {
+  dset(dFace, 'face-api.js NOT LOADED', 'err');
+  dlog('face-api.js did not load.', 'err');
+}
+
+if (typeof cocoSsd === 'undefined') {
+  dset(dObj, 'coco-ssd NOT LOADED', 'err');
+  dlog('coco-ssd did not load.', 'err');
+}
+
 function checkReady() {
   if (faceReady && objReady) {
     setStatus('Models ready — click Start Camera', 'ok');
     startBtn.disabled = false;
-    dbg('');
+    dlog('All models ready. Camera can start.', 'info');
   }
 }
 
 async function loadModels() {
   startBtn.disabled = true;
-  setStatus('Loading face + object models…');
-  dbg('Downloading model weights…');
-  await Promise.all([
-    faceapi.nets.tinyFaceDetector.loadFromUri(FACE_MODEL_URL)
-      .then(() => { faceReady = true; dbg('Face model loaded ✓'); checkReady(); })
-      .catch(e => { setStatus('❌ Failed to load face model.', 'error'); dbg('Face model error: ' + e.message); }),
-    cocoSsd.load({ base: 'lite_mobilenet_v2' })
-      .then(m => { cocoModel = m; objReady = true; dbg('Object model loaded ✓'); checkReady(); })
-      .catch(e => { setStatus('❌ Failed to load object model.', 'error'); dbg('Object model error: ' + e.message); }),
-  ]);
+  setStatus('Loading models…');
+
+  if (typeof faceapi === 'undefined' || typeof cocoSsd === 'undefined' || typeof tf === 'undefined') {
+    setStatus('❌ Scripts failed to load — check network', 'error');
+    dlog('Cannot load models: one or more scripts missing.', 'err');
+    return;
+  }
+
+  // Face model
+  dset(dFace, 'downloading…', 'warn');
+  faceapi.nets.tinyFaceDetector.loadFromUri(FACE_MODEL_URL)
+    .then(() => {
+      faceReady = true;
+      dset(dFace, 'loaded ✓', 'ok');
+      dlog('Face model loaded successfully.', 'info');
+      checkReady();
+    })
+    .catch(e => {
+      dset(dFace, 'FAILED: ' + e.message, 'err');
+      dlog('Face model failed: ' + e.message, 'err');
+      dset(dErr, e.message, '');
+    });
+
+  // Object model
+  dset(dObj, 'downloading…', 'warn');
+  cocoSsd.load({ base: 'lite_mobilenet_v2' })
+    .then(m => {
+      cocoModel = m;
+      objReady = true;
+      dset(dObj, 'loaded ✓', 'ok');
+      dlog('Object model loaded successfully.', 'info');
+      checkReady();
+    })
+    .catch(e => {
+      dset(dObj, 'FAILED: ' + e.message, 'err');
+      dlog('Object model failed: ' + e.message, 'err');
+      dset(dErr, e.message, '');
+    });
 }
 
-/* ── camera ── */
+/* ════════════════════════════════════════
+   CAMERA
+════════════════════════════════════════ */
 startBtn.addEventListener('click', async () => {
   try {
+    dlog('Requesting camera…', 'info');
     stream = await navigator.mediaDevices.getUserMedia({
       video: { width: 640, height: 480, facingMode: 'user' }, audio: false
     });
     video.srcObject = stream;
     await video.play();
 
-    // Wait for video dimensions to be available, then size both canvases
+    // Wait for real dimensions
     await new Promise(resolve => {
       if (video.videoWidth > 0) { resolve(); return; }
       video.addEventListener('loadedmetadata', resolve, { once: true });
     });
+    // Extra safety wait — some Chromebook cameras report dimensions late
+    await new Promise(r => setTimeout(r, 300));
 
     const W = video.videoWidth  || 640;
     const H = video.videoHeight || 480;
 
-    // Size the overlay canvas (shown on top of video)
-    overlayC.width  = W;
-    overlayC.height = H;
+    overlayC.width  = W;  overlayC.height  = H;
+    snapCanvas.width = W; snapCanvas.height = H;
 
-    // Size the off-screen snap canvas (used as model input)
-    snapCanvas.width  = W;
-    snapCanvas.height = H;
-
-    dbg(`Canvas set to ${W}×${H}`);
+    dset(dCanvas, `${overlayC.width}×${overlayC.height}`, overlayC.width > 0 ? 'ok' : 'err');
+    dset(dSnap,   `${snapCanvas.width}×${snapCanvas.height}`, snapCanvas.width > 0 ? 'ok' : 'err');
+    dlog(`Camera started. Video: ${W}×${H}`, 'info');
 
     running = true;
     startBtn.disabled = true;
@@ -371,10 +458,12 @@ startBtn.addEventListener('click', async () => {
     setStatus('Camera active — scanning…', 'ok');
     loop();
   } catch (e) {
-    setStatus(e.name === 'NotAllowedError'
-      ? '❌ Camera permission denied. Click the camera icon in the address bar.'
-      : '❌ ' + e.message, 'error');
-    dbg('Camera error: ' + e.message);
+    const msg = e.name === 'NotAllowedError'
+      ? 'Camera permission denied.'
+      : e.message;
+    setStatus('❌ ' + msg, 'error');
+    dset(dErr, msg, '');
+    dlog('Camera error: ' + e.message, 'err');
   }
 });
 
@@ -389,27 +478,25 @@ stopBtn.addEventListener('click', () => {
   startBtn.disabled = false;
   stopBtn.disabled  = true;
   setStatus('Stopped.');
-  dbg('');
+  dlog('Stopped.', '');
 });
 
-/* ── draw box helper ── */
+/* ════════════════════════════════════════
+   DRAW
+════════════════════════════════════════ */
 function drawBox(x, y, w, h, color, label, conf) {
-  ctx.strokeStyle = color;
-  ctx.lineWidth   = 2;
-  ctx.shadowColor = color;
-  ctx.shadowBlur  = 10;
-  ctx.strokeRect(x, y, w, h);
-  ctx.shadowBlur  = 0;
+  ctx.strokeStyle = color; ctx.lineWidth = 2;
+  ctx.shadowColor = color; ctx.shadowBlur = 10;
+  ctx.strokeRect(x, y, w, h); ctx.shadowBlur = 0;
   ctx.font = 'bold 11px monospace';
   const text = `${label} ${conf}%`;
-  const tw   = ctx.measureText(text).width + 8;
+  const tw = ctx.measureText(text).width + 8;
   ctx.fillStyle = color + '33';
   ctx.fillRect(x, y > 18 ? y - 18 : y, tw, 18);
   ctx.fillStyle = color;
   ctx.fillText(text, x + 4, y > 18 ? y - 5 : y + 13);
 }
 
-/* ── items panel ── */
 function updateItemsPanel(items) {
   const best = {};
   items.forEach(({ label, conf, color, cat }) => {
@@ -428,72 +515,84 @@ function updateItemsPanel(items) {
   });
 }
 
-/* ── main loop ── */
+/* ════════════════════════════════════════
+   MAIN LOOP
+════════════════════════════════════════ */
 async function loop() {
   if (!running) return;
 
   if (video.readyState >= 2 && snapCanvas.width > 0) {
     frameCount++;
+    dFrames.textContent = frameCount;
+
     const W = overlayC.width;
     const H = overlayC.height;
 
-    // Draw the current video frame into the off-screen canvas (un-mirrored).
-    // Models read from this canvas — avoids tainted-canvas CORS errors that
-    // happen when passing the <video> element directly on some Chromebook builds.
-    snapCtx.drawImage(video, 0, 0, W, H);
+    // Snapshot current frame into off-screen canvas
+    // (models read this — avoids tainted-canvas issues with live video)
+    try {
+      snapCtx.drawImage(video, 0, 0, W, H);
+    } catch(e) {
+      dset(dErr, 'snapCtx.drawImage: ' + e.message, '');
+      dlog('snapCtx.drawImage failed: ' + e.message, 'err');
+      animId = requestAnimationFrame(loop);
+      return;
+    }
 
     ctx.clearRect(0, 0, W, H);
     const allItems = [];
 
-    /* ── Face detection (every frame) ── */
-    try {
-      const faceOpts = new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.40 });
-      const faces    = await faceapi.detectAllFaces(snapCanvas, faceOpts);
-      const resized  = faceapi.resizeResults(faces, { width: W, height: H });
+    /* ── Face detection — every frame ── */
+    if (faceReady) {
+      try {
+        const opts    = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.35 });
+        const faces   = await faceapi.detectAllFaces(snapCanvas, opts);
+        const resized = faceapi.resizeResults(faces, { width: W, height: H });
 
-      resized.forEach(det => {
-        const { x, y, width, height } = det.box;
-        const mx   = W - x - width; // mirror to match CSS-flipped video
-        const conf = Math.round(det.score * 100);
-        drawBox(mx, y, width, height, '#00ffe0', 'FACE', conf);
-        allItems.push({ label: 'person', conf, color: '#00ffe0', cat: 'Person' });
-      });
+        dset(dFaces, resized.length + ' detected', resized.length > 0 ? 'ok' : '');
 
-      const n = resized.length;
-      if (n > 0) sendPhoneAlert(n);
-      countEl.innerHTML = n > 0
-        ? `${n}<span>${n === 1 ? 'face detected' : 'faces detected'}</span>`
-        : '';
+        resized.forEach(det => {
+          const { x, y, width, height } = det.box;
+          const mx   = W - x - width;
+          const conf = Math.round(det.score * 100);
+          drawBox(mx, y, width, height, '#00ffe0', 'FACE', conf);
+          allItems.push({ label: 'person', conf, color: '#00ffe0', cat: 'Person' });
+        });
 
-      if (frameCount % 60 === 0) dbg(`Frame ${frameCount} — faces: ${n}`);
-    } catch(e) {
-      dbg('Face detect error: ' + e.message);
+        const n = resized.length;
+        if (n > 0) sendPhoneAlert(n);
+        countEl.innerHTML = n > 0
+          ? `${n}<span>${n === 1 ? 'face detected' : 'faces detected'}</span>`
+          : '';
+      } catch(e) {
+        dset(dErr, 'face detect: ' + e.message, '');
+        dlog('Face detect error: ' + e.message, 'err');
+      }
     }
 
-    /* ── Object detection (every 3rd frame to save CPU) ── */
-    if (frameCount % 3 === 0 && cocoModel) {
+    /* ── Object detection — every 3rd frame ── */
+    if (frameCount % 3 === 0 && objReady && cocoModel) {
       try {
-        const preds = await cocoModel.detect(snapCanvas, 10, 0.38);
+        const preds = await cocoModel.detect(snapCanvas, 10, 0.35);
         const fresh = [];
-
         preds.forEach(pred => {
           const label = pred.class.toLowerCase();
-          if (label === 'person') return; // handled by face-api above
+          if (label === 'person') return;
           const [bx, by, bw, bh] = pred.bbox;
-          const mx   = W - bx - bw; // mirror
+          const mx   = W - bx - bw;
           const conf = Math.round(pred.score * 100);
           const { cat, color } = getCategory(label);
           drawBox(mx, by, bw, bh, color, label, conf);
           fresh.push({ label, conf, color, cat });
         });
-
         lastObjDetections = fresh;
+        dset(dObjs, fresh.length + ' detected', fresh.length > 0 ? 'ok' : '');
       } catch(e) {
-        dbg('Object detect error: ' + e.message);
+        dset(dErr, 'obj detect: ' + e.message, '');
+        dlog('Object detect error: ' + e.message, 'err');
       }
     }
 
-    // Merge cached object results (only once — no duplicate push)
     lastObjDetections.forEach(item => allItems.push(item));
     updateItemsPanel(allItems);
   }
@@ -501,6 +600,7 @@ async function loop() {
   animId = requestAnimationFrame(loop);
 }
 
+/* ── boot ── */
 loadModels();
 </script>
 </body>
