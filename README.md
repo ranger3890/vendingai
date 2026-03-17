@@ -234,6 +234,7 @@ Face + Objects
 <div id="diag">
 <div id="diag-title">⚙ Diagnostics</div>
 <div id="diag-body">
+<div class="drow"><span class="dk">Device type</span> <span class="dv" id="d-device">—</span></div>
 <div class="drow"><span class="dk">Active mode</span> <span class="dv ok" id="d-mode">Chrome Built-in</span></div>
 <div class="drow"><span class="dk">Built-in API</span> <span class="dv" id="d-builtin">—</span></div>
 <div class="drow"><span class="dk">Skin blobs</span> <span class="dv" id="d-skin">—</span></div>
@@ -324,6 +325,20 @@ const NTFY_TOPIC = 'myfacealert123';
 const FACE_MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
 
 /* ════════════════════════════════════════
+DEVICE DETECTION
+════════════════════════════════════════ */
+const IS_CHROMEBOOK = /CrOS/.test(navigator.userAgent);
+
+// Hide skin mode button on non-Chromebook devices — it's only useful there
+if (!IS_CHROMEBOOK) {
+const skinBtn = document.getElementById('btn-skin');
+skinBtn.style.display = 'none';
+}
+
+document.getElementById('d-device').textContent = IS_CHROMEBOOK ? 'Chromebook ✓' : 'Non-Chromebook';
+document.getElementById('d-device').className = 'dv' + (IS_CHROMEBOOK ? ' ok' : '');
+
+/* ════════════════════════════════════════
 CHECK BUILT-IN API
 ════════════════════════════════════════ */
 if ('FaceDetector' in window) {
@@ -331,14 +346,24 @@ builtinDetector = new FaceDetector({ fastMode: false, maxDetectedFaces: 10 });
 dset(dBuiltin, 'Supported ✓', 'ok');
 dlog('Chrome FaceDetector API available.', 'info');
 } else {
-dset(dBuiltin, 'Not supported — using skin fallback', 'warn');
-dlog('Chrome FaceDetector API not available. Auto-switching to Skin Detection fallback.', 'warn');
 document.getElementById('btn-builtin').classList.add('disabled-mode');
 document.getElementById('btn-builtin').title = 'Not supported in this browser';
-// auto-select skin mode
+
+if (IS_CHROMEBOOK) {
+// Chromebook but FaceDetector blocked — fall back to skin detection
+dset(dBuiltin, 'Blocked — using skin fallback', 'warn');
+dlog('FaceDetector API blocked on this Chromebook. Auto-switching to Skin Detection.', 'warn');
 document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
 document.getElementById('btn-skin').classList.add('active');
 currentMode = 'skin';
+} else {
+// Non-Chromebook (phone, Mac, PC) — fall back to faceapi CDN mode
+dset(dBuiltin, 'Not supported — try Face-API mode', 'warn');
+dlog('FaceDetector API not available. Switch to Face-API.js or Face+Objects mode.', 'warn');
+document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+document.getElementById('btn-faceapi').classList.add('active');
+currentMode = 'faceapi';
+}
 }
 
 /* ════════════════════════════════════════
@@ -360,6 +385,7 @@ onModeChange();
 
 function onModeChange() {
 dset(dMode, currentMode === 'builtin' ? 'Chrome Built-in' :
+currentMode === 'skin' ? 'Skin Detection' :
 currentMode === 'faceapi' ? 'Face-API.js (CDN)' :
 'Face + Objects (CDN)', 'ok');
 
