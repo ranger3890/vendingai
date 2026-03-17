@@ -199,6 +199,10 @@ border-bottom: 1px solid rgba(255,255,255,0.04); animation: fadeIn 0.3s ease;
 Chrome Built-in
 <span class="badge">No CDN · Face only</span>
 </button>
+<button class="mode-btn" data-mode="skin" id="btn-skin">
+Skin Detection
+<span class="badge">No CDN · Fallback</span>
+</button>
 <button class="mode-btn" data-mode="faceapi" id="btn-faceapi">
 Face-API.js
 <span class="badge">CDN · Face only</span>
@@ -232,6 +236,7 @@ Face + Objects
 <div id="diag-body">
 <div class="drow"><span class="dk">Active mode</span> <span class="dv ok" id="d-mode">Chrome Built-in</span></div>
 <div class="drow"><span class="dk">Built-in API</span> <span class="dv" id="d-builtin">—</span></div>
+<div class="drow"><span class="dk">Skin blobs</span> <span class="dv" id="d-skin">—</span></div>
 <div class="drow"><span class="dk">TF.js</span> <span class="dv" id="d-tf">not loaded</span></div>
 <div class="drow"><span class="dk">Face model</span> <span class="dv" id="d-face">not loaded</span></div>
 <div class="drow"><span class="dk">Object model</span> <span class="dv" id="d-obj">not loaded</span></div>
@@ -273,6 +278,7 @@ const modelBadge = document.getElementById('model-badge');
 
 const dMode = document.getElementById('d-mode');
 const dBuiltin = document.getElementById('d-builtin');
+const dSkin = document.getElementById('d-skin');
 const dTf = document.getElementById('d-tf');
 const dFace = document.getElementById('d-face');
 const dObj = document.getElementById('d-obj');
@@ -325,11 +331,14 @@ builtinDetector = new FaceDetector({ fastMode: false, maxDetectedFaces: 10 });
 dset(dBuiltin, 'Supported ✓', 'ok');
 dlog('Chrome FaceDetector API available.', 'info');
 } else {
-dset(dBuiltin, 'Not supported', 'err');
-dlog('Chrome FaceDetector API not available. Enable chrome://flags → Experimental Web Platform Features.', 'warn');
-// Disable builtin button and auto-switch to faceapi
+dset(dBuiltin, 'Not supported — using skin fallback', 'warn');
+dlog('Chrome FaceDetector API not available. Auto-switching to Skin Detection fallback.', 'warn');
 document.getElementById('btn-builtin').classList.add('disabled-mode');
 document.getElementById('btn-builtin').title = 'Not supported in this browser';
+// auto-select skin mode
+document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+document.getElementById('btn-skin').classList.add('active');
+currentMode = 'skin';
 }
 
 /* ════════════════════════════════════════
@@ -357,12 +366,17 @@ currentMode === 'faceapi' ? 'Face-API.js (CDN)' :
 if (currentMode === 'builtin') {
 modelBadge.textContent = 'Chrome FaceDetector API';
 if (!builtinDetector) {
-setStatus('❌ Built-in API not supported — switch to a CDN mode.', 'error');
+setStatus('❌ Built-in API not supported — switch to Skin Detection or a CDN mode.', 'error');
 startBtn.disabled = true;
 } else {
 setStatus('Built-in mode ready — click Start Camera.', 'ok');
 startBtn.disabled = false;
 }
+itemsGrid.innerHTML = '';
+} else if (currentMode === 'skin') {
+modelBadge.textContent = 'Skin Colour Detection · No CDN';
+setStatus('Skin detection ready — click Start Camera.', 'ok');
+startBtn.disabled = false;
 itemsGrid.innerHTML = '';
 } else if (currentMode === 'faceapi') {
 modelBadge.textContent = 'face-api.js · TinyFaceDetector';
@@ -643,6 +657,154 @@ itemsGrid.appendChild(chip);
 }
 
 /* ════════════════════════════════════════
+SKIN COLOUR DETECTION
+Works in YCbCr + HSV colour space.
+Finds connected blobs of skin-coloured pixels,
+filters by aspect ratio and size to find faces.
+════════════════════════════════════════ */
+
+// Offscreen work canvas for skin detection (lower res for speed)
+const skinCanvas = document.createElement('canvas');
+const skinCtx = skinCanvas.getContext('2d', { willReadFrequently: true });
+const SKIN_SCALE = 0.25; // analyse at 25% resolution for speed
+
+function isSkinYCbCr(r, g, b) {
+// Convert RGB → YCbCr
+const Y = 0.299 * r + 0.587 * g + 0.114 * b;
+const Cb = -0.169 * r - 0.331 * g + 0.500 * b + 128;
+const Cr = 0.500 * r - 0.419 * g - 0.081 * b + 128;
+// Standard YCbCr skin range
+return Y > 80 && Cb >= 77 && Cb <= 127 && Cr >= 133 && Cr <= 173;
+}
+
+function isSkinHSV(r, g, b) {
+const rn = r/255, gn = g/255, bn = b/255;
+const max = Math.max(rn,gn,bn), min = Math.min(rn,gn,bn);
+const d = max - min;
+if (max === 0) return false;
+const s = d / max;
+let h = 0;
+if (d !== 0) {
+if (max === rn) h = ((gn - bn) / d) % 6;
+else if (max === gn) h = (bn - rn) / d + 2;
+else h = (rn - gn) / d + 4;
+h = h * 60;
+if (h < 0) h += 360;
+}
+// HSV skin hue range
+return h >= 0 && h <= 50 && s >= 0.2 && s <= 0.85 && max >= 0.35;
+}
+
+function isSkin(r, g, b) {
+return isSkinYCbCr(r, g, b) && isSkinHSV(r, g, b);
+}
+
+function detectSkinBlobs(W, H) {
+// Draw mirrored frame to skin canvas at reduced scale
+const sw = Math.floor(W * SKIN_SCALE);
+const sh = Math.floor(H * SKIN_SCALE);
+skinCanvas.width = sw;
+skinCanvas.height = sh;
+skinCtx.save();
+skinCtx.translate(sw, 0); skinCtx.scale(-1, 1);
+skinCtx.drawImage(video, 0, 0, sw, sh);
+skinCtx.restore();
+
+const imageData = skinCtx.getImageData(0, 0, sw, sh);
+const data = imageData.data;
+
+// Build binary skin mask
+const mask = new Uint8Array(sw * sh);
+for (let i = 0; i < sw * sh; i++) {
+const r = data[i*4], g = data[i*4+1], b = data[i*4+2];
+mask[i] = isSkin(r, g, b) ? 1 : 0;
+}
+
+// Simple morphological dilation (fill small gaps)
+const dilated = new Uint8Array(sw * sh);
+const radius = 2;
+for (let y = 0; y < sh; y++) {
+for (let x = 0; x < sw; x++) {
+let found = false;
+outer: for (let dy = -radius; dy <= radius && !found; dy++) {
+for (let dx = -radius; dx <= radius && !found; dx++) {
+const nx = x+dx, ny = y+dy;
+if (nx >= 0 && nx < sw && ny >= 0 && ny < sh && mask[ny*sw+nx]) found = true;
+}
+}
+dilated[y*sw+x] = found ? 1 : 0;
+}
+}
+
+// Connected components (flood fill)
+const labels = new Int32Array(sw * sh).fill(-1);
+let nextLabel = 0;
+const components = []; // [{minX,minY,maxX,maxY,size}]
+
+for (let y = 0; y < sh; y++) {
+for (let x = 0; x < sw; x++) {
+if (!dilated[y*sw+x] || labels[y*sw+x] !== -1) continue;
+// BFS flood fill
+const label = nextLabel++;
+const comp = { minX: x, minY: y, maxX: x, maxY: y, size: 0 };
+const queue = [[x, y]];
+labels[y*sw+x] = label;
+while (queue.length) {
+const [cx, cy] = queue.pop();
+comp.minX = Math.min(comp.minX, cx);
+comp.minY = Math.min(comp.minY, cy);
+comp.maxX = Math.max(comp.maxX, cx);
+comp.maxY = Math.max(comp.maxY, cy);
+comp.size++;
+const neighbors = [[cx-1,cy],[cx+1,cy],[cx,cy-1],[cx,cy+1]];
+for (const [nx, ny] of neighbors) {
+if (nx >= 0 && nx < sw && ny >= 0 && ny < sh &&
+dilated[ny*sw+nx] && labels[ny*sw+nx] === -1) {
+labels[ny*sw+nx] = label;
+queue.push([nx, ny]);
+}
+}
+}
+components.push(comp);
+}
+}
+
+// Filter blobs that could be faces
+// Scale back to full resolution
+const inv = 1 / SKIN_SCALE;
+const faces = [];
+const minArea = sw * sh * 0.005; // at least 0.5% of frame
+const maxArea = sw * sh * 0.7; // at most 70% of frame
+
+components.forEach(c => {
+if (c.size < minArea || c.size > maxArea) return;
+const bw = c.maxX - c.minX;
+const bh = c.maxY - c.minY;
+if (bw < 5 || bh < 5) return;
+const aspect = bw / bh;
+// Faces are roughly 0.5–1.5 aspect ratio
+if (aspect < 0.35 || aspect > 2.2) return;
+
+// Skin density check — real face has high skin pixel density inside bbox
+const bboxArea = bw * bh;
+const density = c.size / bboxArea;
+if (density < 0.25) return;
+
+faces.push({
+x: Math.floor(c.minX * inv),
+y: Math.floor(c.minY * inv),
+w: Math.ceil(bw * inv),
+h: Math.ceil(bh * inv),
+density: Math.round(density * 100),
+});
+});
+
+// Sort by size descending, keep top 5
+faces.sort((a, b) => (b.w * b.h) - (a.w * a.h));
+return faces.slice(0, 5);
+}
+
+/* ════════════════════════════════════════
 MAIN LOOP
 ════════════════════════════════════════ */
 async function loop() {
@@ -685,6 +847,31 @@ countEl.innerHTML = n > 0 ? `${n}<span>${n === 1 ? 'face detected' : 'faces dete
 } catch(e) {
 dset(dErr, e.message.slice(0, 80), '');
 dlog('Built-in detect error: ' + e.message, 'err');
+}
+
+/* ── MODE: Skin colour detection ── */
+} else if (currentMode === 'skin') {
+try {
+const blobs = detectSkinBlobs(W, H);
+dset(dSkin, blobs.length + ' blob(s)', blobs.length > 0 ? 'ok' : '');
+dset(dFaces, blobs.length + ' detected', blobs.length > 0 ? 'ok' : '');
+
+blobs.forEach(blob => {
+// draw skin overlay (semi-transparent fill)
+ctx.fillStyle = 'rgba(255,60,172,0.08)';
+ctx.fillRect(blob.x, blob.y, blob.w, blob.h);
+drawBox(blob.x, blob.y, blob.w, blob.h, '#ff3cac', 'SKIN', blob.density);
+allItems.push({ label: 'Skin Region', cat: 'Face', color: '#ff3cac', conf: blob.density });
+});
+
+const n = blobs.length;
+if (n > 0) sendPhoneAlert(n);
+countEl.innerHTML = n > 0
+? `${n}<span>${n === 1 ? 'skin region detected' : 'skin regions detected'}</span>`
+: '';
+} catch(e) {
+dset(dErr, e.message.slice(0, 80), '');
+dlog('Skin detect error: ' + e.message, 'err');
 }
 
 /* ── MODE: face-api.js only ── */
