@@ -1,4 +1,4 @@
-[face-scan.html](https://github.com/user-attachments/files/26042088/face-scan.html)
+[face-scan.html](https://github.com/user-attachments/files/26042147/face-scan.html)
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -73,6 +73,11 @@ button:disabled::before { display:none; }
 #status { margin-top:0.6rem; font-size:0.72rem; letter-spacing:0.1em; color:var(--dim); text-align:center; }
 #status.ok { color: var(--accent); }
 #status.error { color: var(--accent2); }
+#debug {
+  margin-top: 0.5rem; max-width: 640px; width: 100%;
+  font-size: 0.64rem; color: #ff6b6b; text-align: center;
+  min-height: 1rem; letter-spacing: 0.05em; line-height: 1.6;
+}
 #items-panel {
   margin-top: 1.4rem; width: min(640px, 100%);
   border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
@@ -125,11 +130,6 @@ button:disabled::before { display:none; }
 .notif-item .msg { color: var(--accent); }
 .notif-item .time { color: var(--dim); font-size: 0.62rem; }
 .notif-item.fail .msg { color: var(--accent2); }
-#tip {
-  margin-top: 1rem; max-width: 480px; text-align: center;
-  font-size: 0.68rem; color: var(--dim); line-height: 1.7;
-  border: 1px solid var(--border); padding: 0.8rem 1.2rem; border-radius: 4px;
-}
 </style>
 </head>
 <body>
@@ -153,6 +153,7 @@ button:disabled::before { display:none; }
 
 <div id="count"></div>
 <div id="status" class="ok">Loading models…</div>
+<div id="debug"></div>
 
 <div id="items-panel">
   <h2>🔍 Detected Items <span class="model-badge">COCO-SSD · 80 classes</span></h2>
@@ -164,8 +165,6 @@ button:disabled::before { display:none; }
   <div id="notif-list"></div>
 </div>
 
-<div id="tip"></div>
-
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
@@ -175,7 +174,7 @@ const overlayC  = document.getElementById('oc');
 const ctx       = overlayC.getContext('2d');
 const statusEl  = document.getElementById('status');
 const countEl   = document.getElementById('count');
-const tipEl     = document.getElementById('tip');
+const debugEl   = document.getElementById('debug');
 const startBtn  = document.getElementById('startBtn');
 const stopBtn   = document.getElementById('stopBtn');
 const notifList = document.getElementById('notif-list');
@@ -184,12 +183,51 @@ const itemsGrid = document.getElementById('items-grid');
 let stream = null, running = false, animId = null;
 let faceReady = false, objReady = false, cocoModel = null;
 let lastNotifTime = 0, frameCount = 0;
-let lastObjDetections = []; // cache: persisted between non-detection frames
+let lastObjDetections = [];
 
-const NTFY_TOPIC = 'myfacealert123';
+// Off-screen canvas used as the detection source.
+// We draw each video frame into this ourselves — this avoids
+// the CORS/tainted-canvas issue that silently breaks detection
+// when passing the <video> element directly to the models.
+const snapCanvas = document.createElement('canvas');
+const snapCtx    = snapCanvas.getContext('2d');
+
+const NTFY_TOPIC     = 'myfacealert123';
 const FACE_MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
 
-/* ── Category map: COCO label → { cat, color } ── */
+/* ── debug display (visible on page, not just console) ── */
+function dbg(msg) {
+  console.warn('[SCAN]', msg);
+  debugEl.textContent = msg;
+}
+
+/* ── status ── */
+function setStatus(msg, cls = '') { statusEl.textContent = msg; statusEl.className = cls; }
+
+/* ── notification log ── */
+function logNotif(msg, ok = true) {
+  const el = document.createElement('div');
+  el.className = 'notif-item' + (ok ? '' : ' fail');
+  el.innerHTML = `<span class="msg">${msg}</span><span class="time">${new Date().toLocaleTimeString()}</span>`;
+  notifList.prepend(el);
+}
+
+async function sendPhoneAlert(count) {
+  const now = Date.now();
+  if (now - lastNotifTime < 10000) return;
+  lastNotifTime = now;
+  const body = `📸 Customer detected! ${count} person${count > 1 ? 's' : ''} at the vending machine.`;
+  try {
+    const res = await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+      method: 'POST', body,
+      headers: { 'Title': 'Vending Machine Alert', 'Priority': 'default', 'Tags': 'vending,face,camera' }
+    });
+    res.ok ? logNotif(`✅ Alert sent: ${count} face${count > 1 ? 's' : ''} detected`)
+           : logNotif(`❌ ntfy error ${res.status}`, false);
+  } catch { logNotif('❌ Could not reach ntfy.sh', false); }
+}
+
+/* ── category map ── */
 const CATEGORY_MAP = {
   person:            { cat: 'Person',      color: '#00ffe0' },
   bicycle:           { cat: 'Vehicle',     color: '#ffe600' },
@@ -272,34 +310,8 @@ const CATEGORY_MAP = {
   'hair drier':      { cat: 'Appliance',   color: '#dfe6e9' },
   toothbrush:        { cat: 'Personal',    color: '#dfe6e9' },
 };
-
 function getCategory(label) {
   return CATEGORY_MAP[label.toLowerCase()] || { cat: 'Object', color: '#aaaaaa' };
-}
-
-/* ── helpers ── */
-function setStatus(msg, cls = '') { statusEl.textContent = msg; statusEl.className = cls; }
-
-function logNotif(msg, ok = true) {
-  const el = document.createElement('div');
-  el.className = 'notif-item' + (ok ? '' : ' fail');
-  el.innerHTML = `<span class="msg">${msg}</span><span class="time">${new Date().toLocaleTimeString()}</span>`;
-  notifList.prepend(el);
-}
-
-async function sendPhoneAlert(count) {
-  const now = Date.now();
-  if (now - lastNotifTime < 10000) return;
-  lastNotifTime = now;
-  const body = `📸 Customer detected! ${count} person${count > 1 ? 's' : ''} at the vending machine.`;
-  try {
-    const res = await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
-      method: 'POST', body,
-      headers: { 'Title': 'Vending Machine Alert', 'Priority': 'default', 'Tags': 'vending,face,camera' }
-    });
-    res.ok ? logNotif(`✅ Alert sent: ${count} face${count > 1 ? 's' : ''} detected`)
-           : logNotif(`❌ ntfy error ${res.status}`, false);
-  } catch { logNotif('❌ Could not reach ntfy.sh', false); }
 }
 
 /* ── model loading ── */
@@ -307,19 +319,21 @@ function checkReady() {
   if (faceReady && objReady) {
     setStatus('Models ready — click Start Camera', 'ok');
     startBtn.disabled = false;
+    dbg('');
   }
 }
 
 async function loadModels() {
   startBtn.disabled = true;
   setStatus('Loading face + object models…');
+  dbg('Downloading model weights…');
   await Promise.all([
     faceapi.nets.tinyFaceDetector.loadFromUri(FACE_MODEL_URL)
-      .then(() => { faceReady = true; checkReady(); })
-      .catch(e => { console.error(e); setStatus('❌ Failed to load face model.', 'error'); }),
+      .then(() => { faceReady = true; dbg('Face model loaded ✓'); checkReady(); })
+      .catch(e => { setStatus('❌ Failed to load face model.', 'error'); dbg('Face model error: ' + e.message); }),
     cocoSsd.load({ base: 'lite_mobilenet_v2' })
-      .then(m => { cocoModel = m; objReady = true; checkReady(); })
-      .catch(e => { console.error(e); setStatus('❌ Failed to load object model.', 'error'); }),
+      .then(m => { cocoModel = m; objReady = true; dbg('Object model loaded ✓'); checkReady(); })
+      .catch(e => { setStatus('❌ Failed to load object model.', 'error'); dbg('Object model error: ' + e.message); }),
   ]);
 }
 
@@ -331,19 +345,36 @@ startBtn.addEventListener('click', async () => {
     });
     video.srcObject = stream;
     await video.play();
-    video.addEventListener('loadedmetadata', () => {
-      overlayC.width = video.videoWidth;
-      overlayC.height = video.videoHeight;
-    }, { once: true });
+
+    // Wait for video dimensions to be available, then size both canvases
+    await new Promise(resolve => {
+      if (video.videoWidth > 0) { resolve(); return; }
+      video.addEventListener('loadedmetadata', resolve, { once: true });
+    });
+
+    const W = video.videoWidth  || 640;
+    const H = video.videoHeight || 480;
+
+    // Size the overlay canvas (shown on top of video)
+    overlayC.width  = W;
+    overlayC.height = H;
+
+    // Size the off-screen snap canvas (used as model input)
+    snapCanvas.width  = W;
+    snapCanvas.height = H;
+
+    dbg(`Canvas set to ${W}×${H}`);
+
     running = true;
     startBtn.disabled = true;
-    stopBtn.disabled = false;
+    stopBtn.disabled  = false;
     setStatus('Camera active — scanning…', 'ok');
     loop();
   } catch (e) {
     setStatus(e.name === 'NotAllowedError'
       ? '❌ Camera permission denied. Click the camera icon in the address bar.'
       : '❌ ' + e.message, 'error');
+    dbg('Camera error: ' + e.message);
   }
 });
 
@@ -356,21 +387,22 @@ stopBtn.addEventListener('click', () => {
   itemsGrid.innerHTML = '';
   lastObjDetections = [];
   startBtn.disabled = false;
-  stopBtn.disabled = true;
+  stopBtn.disabled  = true;
   setStatus('Stopped.');
+  dbg('');
 });
 
 /* ── draw box helper ── */
-function drawBox(x, y, w, h, color, topLabel, conf) {
+function drawBox(x, y, w, h, color, label, conf) {
   ctx.strokeStyle = color;
-  ctx.lineWidth = 2;
+  ctx.lineWidth   = 2;
   ctx.shadowColor = color;
-  ctx.shadowBlur = 10;
+  ctx.shadowBlur  = 10;
   ctx.strokeRect(x, y, w, h);
-  ctx.shadowBlur = 0;
+  ctx.shadowBlur  = 0;
   ctx.font = 'bold 11px monospace';
-  const text = `${topLabel} ${conf}%`;
-  const tw = ctx.measureText(text).width + 8;
+  const text = `${label} ${conf}%`;
+  const tw   = ctx.measureText(text).width + 8;
   ctx.fillStyle = color + '33';
   ctx.fillRect(x, y > 18 ? y - 18 : y, tw, 18);
   ctx.fillStyle = color;
@@ -379,7 +411,6 @@ function drawBox(x, y, w, h, color, topLabel, conf) {
 
 /* ── items panel ── */
 function updateItemsPanel(items) {
-  // Deduplicate: keep highest confidence per label
   const best = {};
   items.forEach(({ label, conf, color, cat }) => {
     if (!best[label] || conf > best[label].conf) best[label] = { conf, color, cat };
@@ -401,55 +432,69 @@ function updateItemsPanel(items) {
 async function loop() {
   if (!running) return;
 
-  if (video.readyState >= 2) {
+  if (video.readyState >= 2 && snapCanvas.width > 0) {
     frameCount++;
-    ctx.clearRect(0, 0, overlayC.width, overlayC.height);
-    const W = overlayC.width, H = overlayC.height;
+    const W = overlayC.width;
+    const H = overlayC.height;
 
-    // Start with face detections for this frame
+    // Draw the current video frame into the off-screen canvas (un-mirrored).
+    // Models read from this canvas — avoids tainted-canvas CORS errors that
+    // happen when passing the <video> element directly on some Chromebook builds.
+    snapCtx.drawImage(video, 0, 0, W, H);
+
+    ctx.clearRect(0, 0, W, H);
     const allItems = [];
 
-    /* Face detection — every frame */
+    /* ── Face detection (every frame) ── */
     try {
-      const faceOpts = new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.45 });
-      const faces = await faceapi.detectAllFaces(video, faceOpts);
-      const resized = faceapi.resizeResults(faces, { width: W, height: H });
+      const faceOpts = new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.40 });
+      const faces    = await faceapi.detectAllFaces(snapCanvas, faceOpts);
+      const resized  = faceapi.resizeResults(faces, { width: W, height: H });
+
       resized.forEach(det => {
         const { x, y, width, height } = det.box;
-        const mx = W - x - width;
+        const mx   = W - x - width; // mirror to match CSS-flipped video
         const conf = Math.round(det.score * 100);
         drawBox(mx, y, width, height, '#00ffe0', 'FACE', conf);
         allItems.push({ label: 'person', conf, color: '#00ffe0', cat: 'Person' });
       });
+
       const n = resized.length;
       if (n > 0) sendPhoneAlert(n);
       countEl.innerHTML = n > 0
         ? `${n}<span>${n === 1 ? 'face detected' : 'faces detected'}</span>`
         : '';
-    } catch { /* skip bad frame */ }
 
-    /* Object detection — every 3rd frame (CPU-friendly for Chromebook) */
+      if (frameCount % 60 === 0) dbg(`Frame ${frameCount} — faces: ${n}`);
+    } catch(e) {
+      dbg('Face detect error: ' + e.message);
+    }
+
+    /* ── Object detection (every 3rd frame to save CPU) ── */
     if (frameCount % 3 === 0 && cocoModel) {
       try {
-        const preds = await cocoModel.detect(video, 10, 0.40);
+        const preds = await cocoModel.detect(snapCanvas, 10, 0.38);
         const fresh = [];
+
         preds.forEach(pred => {
           const label = pred.class.toLowerCase();
-          if (label === 'person') return; // faces already handled above
+          if (label === 'person') return; // handled by face-api above
           const [bx, by, bw, bh] = pred.bbox;
-          const mx = W - bx - bw; // mirror to match flipped video
+          const mx   = W - bx - bw; // mirror
           const conf = Math.round(pred.score * 100);
           const { cat, color } = getCategory(label);
           drawBox(mx, by, bw, bh, color, label, conf);
           fresh.push({ label, conf, color, cat });
         });
-        lastObjDetections = fresh; // update cache only on detection frames
-      } catch { /* skip bad frame */ }
+
+        lastObjDetections = fresh;
+      } catch(e) {
+        dbg('Object detect error: ' + e.message);
+      }
     }
 
-    // Always merge cached object results into this frame's item list (FIX: was added twice before)
+    // Merge cached object results (only once — no duplicate push)
     lastObjDetections.forEach(item => allItems.push(item));
-
     updateItemsPanel(allItems);
   }
 
