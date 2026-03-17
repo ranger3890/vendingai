@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -29,89 +30,94 @@ margin-bottom: 0.3rem;
 }
 .sub { color: var(--dim); font-size: 0.72rem; letter-spacing: 0.18em;
 text-transform: uppercase; margin-bottom: 1rem; }
+
+/* ── mode switcher ── */
+#mode-bar {
+margin-bottom: 1rem; width: min(640px, 100%);
+border: 1px solid var(–border); border-radius: 4px; overflow: hidden;
+}
+#mode-bar-title {
+background: rgba(255,255,255,0.03); padding: 0.4rem 0.8rem;
+color: var(–dim); border-bottom: 1px solid var(–border);
+font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.14em;
+}
+#mode-buttons {
+display: flex; flex-wrap: wrap; gap: 0;
+}
+.mode-btn {
+flex: 1; min-width: 140px;
+font-family: inherit; font-size: 0.68rem; font-weight: 700;
+letter-spacing: 0.1em; text-transform: uppercase;
+padding: 0.7rem 0.5rem; border: none; border-right: 1px solid var(–border);
+background: transparent; color: var(–dim); cursor: pointer;
+transition: all 0.2s; position: relative; text-align: center;
+}
+.mode-btn:last-child { border-right: none; }
+.mode-btn:hover { color: var(–accent); background: rgba(0,255,224,0.04); }
+.mode-btn.active { color: var(–bg); background: var(–accent); }
+.mode-btn.disabled-mode { opacity: 0.3; cursor: not-allowed; }
+.mode-btn .badge {
+display: block; font-size: 0.52rem; opacity: 0.7;
+font-weight: 400; letter-spacing: 0.06em; margin-top: 0.15rem;
+}
+.mode-btn.active .badge { opacity: 0.8; }
+
+/* ── video wrapper ── */
 .wrapper {
 position: relative; display: inline-block;
-border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
+border: 1px solid var(–border); border-radius: 4px; overflow: hidden;
 box-shadow: 0 0 40px rgba(0,255,224,0.07);
 }
 .wrapper::before, .wrapper::after, .cbr, .cbl {
-content: ''; position: absolute; width: 20px; height: 20px;
+content: ‘’; position: absolute; width: 20px; height: 20px;
 z-index: 10; pointer-events: none;
 }
-.wrapper::before { top:8px; left:8px; border-top:2px solid var(--accent); border-left:2px solid var(--accent); }
-.wrapper::after { top:8px; right:8px; border-top:2px solid var(--accent); border-right:2px solid var(--accent); }
-.cbr { bottom:8px; right:8px; border-bottom:2px solid var(--accent); border-right:2px solid var(--accent); }
-.cbl { bottom:8px; left:8px; border-bottom:2px solid var(--accent); border-left:2px solid var(--accent); }
+.wrapper::before { top:8px; left:8px; border-top:2px solid var(–accent); border-left:2px solid var(–accent); }
+.wrapper::after { top:8px; right:8px; border-top:2px solid var(–accent); border-right:2px solid var(–accent); }
+.cbr { bottom:8px; right:8px; border-bottom:2px solid var(–accent); border-right:2px solid var(–accent); }
+.cbl { bottom:8px; left:8px; border-bottom:2px solid var(–accent); border-left:2px solid var(–accent); }
 #videoWrap { position: relative; display: block; }
 #v { display: block; max-width: min(640px, 100%); transform: scaleX(-1); }
 #oc { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
 .scan { position:absolute; left:0; right:0; height:2px;
-background: linear-gradient(90deg, transparent, var(--accent), transparent);
-opacity: 0; animation: scan 3s linear infinite; pointer-events:none; z-index:5; transition: opacity 0.5s; }
-.scan.active { opacity: 0.5; }
+background: linear-gradient(90deg, transparent, var(–accent), transparent);
+opacity: 0.5; animation: scan 3s linear infinite; pointer-events:none; z-index:5; }
 @keyframes scan { 0%{top:0%} 100%{top:100%} }
-
-/* API key input */
-#api-bar {
-margin-bottom: 1rem; width: min(640px, 100%);
-border: 1px solid var(--border); border-radius: 4px; padding: 0.8rem 1rem;
-background: rgba(255,255,255,0.02);
-}
-#api-bar label { font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); display: block; margin-bottom: 0.4rem; }
-#api-bar .row { display: flex; gap: 0.5rem; align-items: center; }
-#api-key {
-flex: 1; background: #0d0d18; border: 1px solid var(--border); border-radius: 2px;
-color: #e8e8f0; font-family: inherit; font-size: 0.72rem; padding: 0.5rem 0.8rem;
-outline: none; transition: border-color 0.2s;
-}
-#api-key:focus { border-color: var(--accent); }
-#api-key::placeholder { color: #33334a; }
-.api-hint { font-size: 0.62rem; color: var(--dim); margin-top: 0.4rem; }
-.api-hint a { color: var(--accent); text-decoration: none; }
 
 .controls { margin-top:1.2rem; display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; }
 button {
 font-family: inherit; font-size:0.78rem; font-weight:700;
 letter-spacing:0.12em; text-transform:uppercase; padding:0.65rem 1.6rem;
-border:1px solid var(--accent); background:transparent; color:var(--accent);
+border:1px solid var(–accent); background:transparent; color:var(–accent);
 cursor:pointer; border-radius:2px; transition:all 0.2s; position:relative; overflow:hidden;
 }
 button::before {
-content:''; position:absolute; inset:0; background:var(--accent);
+content:’’; position:absolute; inset:0; background:var(–accent);
 transform:scaleX(0); transform-origin:left; transition:transform 0.2s; z-index:-1;
 }
-button:hover { color: var(--bg); }
+button:hover { color: var(–bg); }
 button:hover::before { transform: scaleX(1); }
 button:disabled { opacity:0.35; cursor:not-allowed; }
 button:disabled::before { display:none; }
 
 #count {
-margin-top:0.8rem; font-size:2.4rem; font-weight:700; color:var(--accent);
+margin-top:0.8rem; font-size:2.4rem; font-weight:700; color:var(–accent);
 text-align:center; min-height:3rem; text-shadow:0 0 20px rgba(0,255,224,0.4);
 }
-#count span { font-size:0.8rem; color:var(--dim); display:block; margin-top:-0.4rem; }
-#status { margin-top:0.5rem; font-size:0.72rem; letter-spacing:0.1em; color:var(--dim); text-align:center; }
-#status.ok { color: var(--accent); }
-#status.error { color: var(--accent2); }
-#status.scanning { color: #ffe600; }
+#count span { font-size:0.8rem; color:var(–dim); display:block; margin-top:-0.4rem; }
+#status { margin-top:0.5rem; font-size:0.72rem; letter-spacing:0.1em; color:var(–dim); text-align:center; }
+#status.ok { color: var(–accent); }
+#status.error { color: var(–accent2); }
+#status.warn { color: #ffe600; }
 
-/* interval control */
-#interval-bar {
-margin-top: 0.6rem; display: flex; align-items: center; gap: 0.8rem;
-font-size: 0.68rem; color: var(--dim);
-}
-#interval-bar label { letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.62rem; }
-#intervalRange { accent-color: var(--accent); width: 120px; }
-#intervalVal { color: var(--accent); min-width: 3ch; }
-
-/* diag */
+/* ── diag ── */
 #diag {
 margin-top: 0.8rem; width: min(640px, 100%);
 border: 1px solid #2a2a3a; border-radius: 4px; overflow: hidden;
 font-size: 0.65rem; letter-spacing: 0.06em;
 }
 #diag-title { background: rgba(255,255,255,0.03); padding: 0.4rem 0.8rem;
-color: var(--dim); border-bottom: 1px solid #2a2a3a;
+color: var(–dim); border-bottom: 1px solid #2a2a3a;
 font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.14em; }
 #diag-body { padding: 0.5rem 0.8rem; display: flex; flex-direction: column; gap: 0.3rem; }
 .drow { display: flex; justify-content: space-between; gap: 1rem; }
@@ -119,7 +125,7 @@ font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.14em; }
 .drow .dv { color: #e8e8f0; }
 .drow .dv.ok { color: #00ffe0; }
 .drow .dv.err { color: #ff3cac; }
-.drow .dv.warn{ color: #ffe600; }
+.drow .dv.warn { color: #ffe600; }
 #diag-log { margin-top: 0.3rem; border-top: 1px solid #1a1a2a;
 padding: 0.4rem 0.8rem; max-height: 80px; overflow-y: auto;
 display: flex; flex-direction: column; gap: 0.15rem; }
@@ -128,73 +134,80 @@ display: flex; flex-direction: column; gap: 0.15rem; }
 .dlog.warn { color: #ffe600; }
 .dlog.err { color: #ff3cac; }
 
+/* ── items panel ── */
 #items-panel {
 margin-top: 1rem; width: min(640px, 100%);
-border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
+border: 1px solid var(–border); border-radius: 4px; overflow: hidden;
 }
 #items-panel h2 {
 font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase;
-color: var(--dim); padding: 0.6rem 1rem;
-border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02);
+color: var(–dim); padding: 0.6rem 1rem;
+border-bottom: 1px solid var(–border); background: rgba(255,255,255,0.02);
 display: flex; justify-content: space-between; align-items: center;
 }
 #items-panel h2 .model-badge { font-size: 0.58rem; color: #444466; }
 #items-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0.8rem 1rem; min-height: 52px; }
-#items-grid:empty::after { content: 'No items detected yet.'; color: var(--dim); font-size: 0.68rem; }
+#items-grid:empty::after { content: ‘No items detected yet.’; color: var(–dim); font-size: 0.68rem; }
 .item-chip {
 display: flex; align-items: center; gap: 0.4rem;
 padding: 0.25rem 0.7rem; border-radius: 2px; font-size: 0.68rem;
 border: 1px solid; white-space: nowrap; animation: chipIn 0.25s ease;
 }
-@keyframes chipIn { from { opacity:0; transform:scale(0.92); } to { opacity:1; transform:none; } }
-.item-chip .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.item-chip .cat { opacity: 0.55; font-size: 0.58rem; margin-left: 0.2rem; }
+@keyframes chipIn { from{opacity:0;transform:scale(0.92)} to{opacity:1;transform:none} }
+.item-chip .dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.item-chip .cat { opacity:0.55; font-size:0.58rem; margin-left:0.2rem; }
+.item-chip .conf { opacity:0.45; font-size:0.58rem; }
 
+/* ── notif ── */
 #notif-log {
 margin-top: 1rem; width: min(480px, 100%);
-border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
+border: 1px solid var(–border); border-radius: 4px; overflow: hidden;
 }
 #notif-log h2 {
 font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase;
-color: var(--dim); padding: 0.6rem 1rem;
-border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02);
+color: var(–dim); padding: 0.6rem 1rem;
+border-bottom: 1px solid var(–border); background: rgba(255,255,255,0.02);
 }
 #notif-list { max-height: 120px; overflow-y: auto; padding: 0.4rem 0; }
 #notif-list:empty::after {
-content: 'No alerts sent yet.'; display: block; text-align: center;
-color: var(--dim); font-size: 0.68rem; padding: 0.8rem;
+content: ‘No alerts sent yet.’; display: block; text-align: center;
+color: var(–dim); font-size: 0.68rem; padding: 0.8rem;
 }
 .notif-item {
 display: flex; justify-content: space-between; align-items: center;
 padding: 0.35rem 1rem; font-size: 0.68rem;
 border-bottom: 1px solid rgba(255,255,255,0.04); animation: fadeIn 0.3s ease;
 }
-@keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:none; } }
-.notif-item .msg { color: var(--accent); }
-.notif-item .time { color: var(--dim); font-size: 0.62rem; }
-.notif-item.fail .msg { color: var(--accent2); }
-
-/* scanning pulse on overlay */
-#oc.pulsing { animation: borderPulse 1s ease-in-out; }
-@keyframes borderPulse {
-0% { box-shadow: 0 0 0 0 rgba(0,255,224,0); }
-50% { box-shadow: 0 0 20px 4px rgba(0,255,224,0.35); }
-100% { box-shadow: 0 0 0 0 rgba(0,255,224,0); }
-}
+@keyframes fadeIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:none} }
+.notif-item .msg { color: var(–accent); }
+.notif-item .time { color: var(–dim); font-size: 0.62rem; }
+.notif-item.fail .msg { color: var(–accent2); }
 </style>
+
 </head>
 <body>
 
 <h1>FACE + OBJECT SCAN</h1>
-<p class="sub">Vending Machine Prototype · Powered by Claude Vision</p>
+<p class="sub">Vending Machine Prototype</p>
 
-<!-- API Key input -->
-<div id="api-bar">
-<label>⚡ Anthropic API Key (required — runs in your browser only)</label>
-<div class="row">
-<input id="api-key" type="password" placeholder="sk-ant-api03-…" autocomplete="off" spellcheck="false"/>
+<!-- MODE SWITCHER -->
+
+<div id="mode-bar">
+<div id="mode-bar-title">⚡ Detection Mode</div>
+<div id="mode-buttons">
+<button class="mode-btn active" data-mode="builtin" id="btn-builtin">
+Chrome Built-in
+<span class="badge">No CDN · Face only</span>
+</button>
+<button class="mode-btn" data-mode="faceapi" id="btn-faceapi">
+Face-API.js
+<span class="badge">CDN · Face only</span>
+</button>
+<button class="mode-btn" data-mode="full" id="btn-full">
+Face + Objects
+<span class="badge">CDN · TF.js + COCO-SSD</span>
+</button>
 </div>
-<p class="api-hint">No CDN ML libraries needed. Frames are sent to the <strong>Claude vision API</strong> for detection. Your key is never stored. Get one at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>.</p>
 </div>
 
 <div class="wrapper">
@@ -202,7 +215,7 @@ border-bottom: 1px solid rgba(255,255,255,0.04); animation: fadeIn 0.3s ease;
 <video id="v" width="640" height="480" muted playsinline autoplay></video>
 <canvas id="oc"></canvas>
 </div>
-<div class="scan" id="scanBar"></div>
+<div class="scan"></div>
 <div class="cbr"></div><div class="cbl"></div>
 </div>
 
@@ -211,32 +224,28 @@ border-bottom: 1px solid rgba(255,255,255,0.04); animation: fadeIn 0.3s ease;
 <button id="stopBtn" disabled>Stop</button>
 </div>
 
-<div id="interval-bar">
-<label>Scan Interval</label>
-<input type="range" id="intervalRange" min="1" max="10" value="3" step="0.5"/>
-<span id="intervalVal">3s</span>
-</div>
-
 <div id="count"></div>
-<div id="status" class="ok">Enter your API key, then click Start Camera.</div>
+<div id="status" class="ok">Select a mode above, then click Start Camera.</div>
 
 <div id="diag">
 <div id="diag-title">⚙ Diagnostics</div>
 <div id="diag-body">
-<div class="drow"><span class="dk">Claude API</span> <span class="dv" id="d-api">—</span></div>
+<div class="drow"><span class="dk">Active mode</span> <span class="dv ok" id="d-mode">Chrome Built-in</span></div>
+<div class="drow"><span class="dk">Built-in API</span> <span class="dv" id="d-builtin">—</span></div>
+<div class="drow"><span class="dk">TF.js</span> <span class="dv" id="d-tf">not loaded</span></div>
+<div class="drow"><span class="dk">Face model</span> <span class="dv" id="d-face">not loaded</span></div>
+<div class="drow"><span class="dk">Object model</span> <span class="dv" id="d-obj">not loaded</span></div>
 <div class="drow"><span class="dk">Canvas size</span> <span class="dv" id="d-canvas">—</span></div>
-<div class="drow"><span class="dk">Frames captured</span><span class="dv" id="d-frames">0</span></div>
-<div class="drow"><span class="dk">API calls made</span> <span class="dv" id="d-calls">0</span></div>
+<div class="drow"><span class="dk">Frames run</span> <span class="dv" id="d-frames">0</span></div>
 <div class="drow"><span class="dk">Last faces</span> <span class="dv" id="d-faces">—</span></div>
 <div class="drow"><span class="dk">Last objects</span> <span class="dv" id="d-objs">—</span></div>
-<div class="drow"><span class="dk">Last latency</span> <span class="dv" id="d-lat">—</span></div>
 <div class="drow"><span class="dk">Last error</span> <span class="dv err" id="d-err">none</span></div>
 </div>
 <div id="diag-log"></div>
 </div>
 
 <div id="items-panel">
-<h2>🔍 Detected Items <span class="model-badge">Claude Vision · claude-sonnet-4-20250514</span></h2>
+<h2>🔍 Detected Items <span class="model-badge" id="model-badge">Chrome FaceDetector API</span></h2>
 <div id="items-grid"></div>
 </div>
 
@@ -245,8 +254,12 @@ border-bottom: 1px solid rgba(255,255,255,0.04); animation: fadeIn 0.3s ease;
 <div id="notif-list"></div>
 </div>
 
+<!-- CDN scripts — loaded on demand when user switches to a CDN mode -->
+
 <script>
-/* ── DOM refs ── */
+/* ════════════════════════════════════════
+DOM REFS
+════════════════════════════════════════ */
 const video = document.getElementById('v');
 const overlayC = document.getElementById('oc');
 const ctx = overlayC.getContext('2d');
@@ -256,19 +269,17 @@ const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
 const notifList = document.getElementById('notif-list');
 const itemsGrid = document.getElementById('items-grid');
-const scanBar = document.getElementById('scanBar');
-const apiKeyInput = document.getElementById('api-key');
-const intervalRange = document.getElementById('intervalRange');
-const intervalVal = document.getElementById('intervalVal');
+const modelBadge = document.getElementById('model-badge');
 
-/* ── diag refs ── */
-const dApi = document.getElementById('d-api');
+const dMode = document.getElementById('d-mode');
+const dBuiltin = document.getElementById('d-builtin');
+const dTf = document.getElementById('d-tf');
+const dFace = document.getElementById('d-face');
+const dObj = document.getElementById('d-obj');
 const dCanvas = document.getElementById('d-canvas');
 const dFrames = document.getElementById('d-frames');
-const dCalls = document.getElementById('d-calls');
 const dFaces = document.getElementById('d-faces');
 const dObjs = document.getElementById('d-objs');
-const dLat = document.getElementById('d-lat');
 const dErr = document.getElementById('d-err');
 const diagLog = document.getElementById('diag-log');
 
@@ -282,35 +293,166 @@ d.className = 'dlog ' + cls;
 d.textContent = new Date().toLocaleTimeString() + ' — ' + msg;
 diagLog.prepend(d);
 }
-
-/* ── state ── */
-let stream = null, running = false;
-let frameCount = 0, callCount = 0;
-let lastNotifTime = 0;
-let scanTimer = null;
-
-const snapCanvas = document.createElement('canvas');
-const snapCtx = snapCanvas.getContext('2d');
-
-const NTFY_TOPIC = 'myfacealert123';
-
-/* ── interval slider ── */
-intervalRange.addEventListener('input', () => {
-intervalVal.textContent = intervalRange.value + 's';
-});
-
 function setStatus(msg, cls = '') {
 statusEl.textContent = msg;
 statusEl.className = cls;
 }
 
+/* ════════════════════════════════════════
+STATE
+════════════════════════════════════════ */
+let stream = null, running = false, animId = null;
+let frameCount = 0, lastNotifTime = 0;
+let lastObjDetections = [];
+let currentMode = 'builtin'; // 'builtin' | 'faceapi' | 'full'
+
+// CDN model state
+let tfLoaded = false, faceApiLoaded = false, cocoLoaded = false;
+let faceReady = false, objReady = false, cocoModel = null;
+let builtinDetector = null;
+
+const snapCanvas = document.createElement('canvas');
+const snapCtx = snapCanvas.getContext('2d');
+
+const NTFY_TOPIC = 'myfacealert123';
+const FACE_MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+
+/* ════════════════════════════════════════
+CHECK BUILT-IN API
+════════════════════════════════════════ */
+if ('FaceDetector' in window) {
+builtinDetector = new FaceDetector({ fastMode: false, maxDetectedFaces: 10 });
+dset(dBuiltin, 'Supported ✓', 'ok');
+dlog('Chrome FaceDetector API available.', 'info');
+} else {
+dset(dBuiltin, 'Not supported', 'err');
+dlog('Chrome FaceDetector API not available. Enable chrome://flags → Experimental Web Platform Features.', 'warn');
+// Disable builtin button and auto-switch to faceapi
+document.getElementById('btn-builtin').classList.add('disabled-mode');
+document.getElementById('btn-builtin').title = 'Not supported in this browser';
+}
+
+/* ════════════════════════════════════════
+MODE SWITCHER
+════════════════════════════════════════ */
+document.querySelectorAll('.mode-btn').forEach(btn => {
+btn.addEventListener('click', () => {
+if (btn.classList.contains('disabled-mode')) return;
+if (running) {
+setStatus('⚠ Stop the camera before switching modes.', 'warn');
+return;
+}
+document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+btn.classList.add('active');
+currentMode = btn.dataset.mode;
+onModeChange();
+});
+});
+
+function onModeChange() {
+dset(dMode, currentMode === 'builtin' ? 'Chrome Built-in' :
+currentMode === 'faceapi' ? 'Face-API.js (CDN)' :
+'Face + Objects (CDN)', 'ok');
+
+if (currentMode === 'builtin') {
+modelBadge.textContent = 'Chrome FaceDetector API';
+if (!builtinDetector) {
+setStatus('❌ Built-in API not supported — switch to a CDN mode.', 'error');
+startBtn.disabled = true;
+} else {
+setStatus('Built-in mode ready — click Start Camera.', 'ok');
+startBtn.disabled = false;
+}
+itemsGrid.innerHTML = '';
+} else if (currentMode === 'faceapi') {
+modelBadge.textContent = 'face-api.js · TinyFaceDetector';
+setStatus('Loading Face-API from CDN…', 'warn');
+startBtn.disabled = true;
+loadFaceApi().then(() => {
+setStatus('Face-API ready — click Start Camera.', 'ok');
+startBtn.disabled = false;
+}).catch(e => {
+setStatus('❌ CDN failed: ' + e.message, 'error');
+});
+itemsGrid.innerHTML = '';
+} else if (currentMode === 'full') {
+modelBadge.textContent = 'TF.js + COCO-SSD + face-api.js';
+setStatus('Loading models from CDN…', 'warn');
+startBtn.disabled = true;
+loadFullModels().then(() => {
+setStatus('All models ready — click Start Camera.', 'ok');
+startBtn.disabled = false;
+}).catch(e => {
+setStatus('❌ CDN failed: ' + e.message, 'error');
+});
+}
+}
+
+// Set initial mode label
+onModeChange();
+
+/* ════════════════════════════════════════
+DYNAMIC CDN LOADER
+════════════════════════════════════════ */
+function loadScript(src) {
+return new Promise((resolve, reject) => {
+if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+const s = document.createElement('script');
+s.src = src;
+s.onload = resolve;
+s.onerror = () => reject(new Error('Failed to load: ' + src));
+document.head.appendChild(s);
+});
+}
+
+async function loadFaceApi() {
+if (faceApiLoaded && faceReady) return;
+dset(dFace, 'loading CDN…', 'warn');
+if (!tfLoaded) {
+dset(dTf, 'loading CDN…', 'warn');
+await loadScript('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js');
+tfLoaded = true;
+dset(dTf, 'v' + tf.version.tfjs + ' ✓', 'ok');
+dlog('TF.js loaded from CDN.', 'info');
+}
+if (!faceApiLoaded) {
+await loadScript('https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js');
+faceApiLoaded = true;
+dlog('face-api.js loaded from CDN.', 'info');
+}
+if (!faceReady) {
+await faceapi.nets.tinyFaceDetector.loadFromUri(FACE_MODEL_URL);
+faceReady = true;
+dset(dFace, 'loaded ✓', 'ok');
+dlog('Face model weights loaded.', 'info');
+}
+}
+
+async function loadFullModels() {
+await loadFaceApi();
+if (!cocoLoaded) {
+dset(dObj, 'loading CDN…', 'warn');
+await loadScript('https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js');
+cocoLoaded = true;
+dlog('COCO-SSD script loaded from CDN.', 'info');
+}
+if (!objReady) {
+cocoModel = await cocoSsd.load({ base: 'lite_mobilenet_v2' });
+objReady = true;
+dset(dObj, 'loaded ✓', 'ok');
+dlog('COCO-SSD model loaded.', 'info');
+}
+}
+
+/* ════════════════════════════════════════
+NTFY ALERTS
+════════════════════════════════════════ */
 function logNotif(msg, ok = true) {
 const el = document.createElement('div');
 el.className = 'notif-item' + (ok ? '' : ' fail');
 el.innerHTML = `<span class="msg">${msg}</span><span class="time">${new Date().toLocaleTimeString()}</span>`;
 notifList.prepend(el);
 }
-
 async function sendPhoneAlert(count) {
 const now = Date.now();
 if (now - lastNotifTime < 10000) return;
@@ -326,213 +468,85 @@ res.ok ? logNotif(`✅ Alert: ${count} face${count > 1 ? 's' : ''} detected`)
 } catch { logNotif('❌ Could not reach ntfy.sh', false); }
 }
 
-/* ── colour palette for object categories ── */
-const CAT_COLORS = {
-'Person': '#00ffe0',
-'Face': '#00ffe0',
-'Vehicle': '#ffe600',
-'Animal': '#55efc4',
-'Food': '#ff9f43',
-'Electronics': '#b084ff',
-'Furniture': '#a29bfe',
-'Bag': '#e17055',
-'Clothing': '#e17055',
-'Drink': '#fd79a8',
-'Utensil': '#ffeaa7',
-'Appliance': '#636e72',
-'Sports': '#00cec9',
-'Plant': '#6ab04c',
-'Default': '#aaaaaa',
+/* ════════════════════════════════════════
+CATEGORY MAP
+════════════════════════════════════════ */
+const CATEGORY_MAP = {
+person: { cat: 'Person', color: '#00ffe0' },
+bicycle: { cat: 'Vehicle', color: '#ffe600' },
+car: { cat: 'Vehicle', color: '#ffe600' },
+motorcycle: { cat: 'Vehicle', color: '#ffe600' },
+airplane: { cat: 'Vehicle', color: '#ffe600' },
+bus: { cat: 'Vehicle', color: '#ffe600' },
+train: { cat: 'Vehicle', color: '#ffe600' },
+truck: { cat: 'Vehicle', color: '#ffe600' },
+boat: { cat: 'Vehicle', color: '#ffe600' },
+'traffic light': { cat: 'Street', color: '#fdcb6e' },
+'fire hydrant': { cat: 'Street', color: '#fdcb6e' },
+'stop sign': { cat: 'Street', color: '#fdcb6e' },
+bench: { cat: 'Street', color: '#fdcb6e' },
+bird: { cat: 'Animal', color: '#55efc4' },
+cat: { cat: 'Animal', color: '#55efc4' },
+dog: { cat: 'Animal', color: '#55efc4' },
+horse: { cat: 'Animal', color: '#55efc4' },
+cow: { cat: 'Animal', color: '#55efc4' },
+elephant: { cat: 'Animal', color: '#55efc4' },
+bear: { cat: 'Animal', color: '#55efc4' },
+backpack: { cat: 'Bag', color: '#e17055' },
+umbrella: { cat: 'Accessory', color: '#e17055' },
+handbag: { cat: 'Bag', color: '#e17055' },
+tie: { cat: 'Clothing', color: '#e17055' },
+suitcase: { cat: 'Bag', color: '#e17055' },
+'sports ball': { cat: 'Sports', color: '#00cec9' },
+skateboard: { cat: 'Sports', color: '#00cec9' },
+bottle: { cat: 'Drink', color: '#fd79a8' },
+'wine glass': { cat: 'Drink', color: '#fd79a8' },
+cup: { cat: 'Drink', color: '#fd79a8' },
+fork: { cat: 'Utensil', color: '#ffeaa7' },
+knife: { cat: 'Utensil', color: '#ffeaa7' },
+spoon: { cat: 'Utensil', color: '#ffeaa7' },
+bowl: { cat: 'Utensil', color: '#ffeaa7' },
+banana: { cat: 'Food', color: '#ff9f43' },
+apple: { cat: 'Food', color: '#ff9f43' },
+sandwich: { cat: 'Food', color: '#ff9f43' },
+orange: { cat: 'Food', color: '#ff9f43' },
+broccoli: { cat: 'Food', color: '#ff9f43' },
+carrot: { cat: 'Food', color: '#ff9f43' },
+'hot dog': { cat: 'Food', color: '#ff9f43' },
+pizza: { cat: 'Food', color: '#ff9f43' },
+donut: { cat: 'Food', color: '#ff9f43' },
+cake: { cat: 'Food', color: '#ff9f43' },
+chair: { cat: 'Furniture', color: '#a29bfe' },
+couch: { cat: 'Furniture', color: '#a29bfe' },
+'potted plant': { cat: 'Plant', color: '#6ab04c' },
+bed: { cat: 'Furniture', color: '#a29bfe' },
+'dining table': { cat: 'Furniture', color: '#a29bfe' },
+tv: { cat: 'Electronics', color: '#b084ff' },
+laptop: { cat: 'Electronics', color: '#b084ff' },
+mouse: { cat: 'Electronics', color: '#b084ff' },
+remote: { cat: 'Electronics', color: '#b084ff' },
+keyboard: { cat: 'Electronics', color: '#b084ff' },
+'cell phone': { cat: 'Electronics', color: '#b084ff' },
+microwave: { cat: 'Appliance', color: '#636e72' },
+oven: { cat: 'Appliance', color: '#636e72' },
+toaster: { cat: 'Appliance', color: '#636e72' },
+sink: { cat: 'Appliance', color: '#636e72' },
+refrigerator: { cat: 'Appliance', color: '#636e72' },
+book: { cat: 'Books', color: '#74b9ff' },
+clock: { cat: 'Decor', color: '#badc58' },
+vase: { cat: 'Decor', color: '#badc58' },
+scissors: { cat: 'Tool', color: '#dfe6e9' },
+'teddy bear': { cat: 'Toy', color: '#fab1a0' },
+toothbrush: { cat: 'Personal', color: '#dfe6e9' },
 };
-function catColor(cat) { return CAT_COLORS[cat] || CAT_COLORS['Default']; }
-
-/* ── draw bounding box ── */
-function drawBox(x, y, w, h, color, label, conf) {
-ctx.strokeStyle = color; ctx.lineWidth = 2;
-ctx.shadowColor = color; ctx.shadowBlur = 10;
-ctx.strokeRect(x, y, w, h); ctx.shadowBlur = 0;
-ctx.font = 'bold 11px monospace';
-const text = conf ? `${label} ${conf}%` : label;
-const tw = ctx.measureText(text).width + 8;
-ctx.fillStyle = color + '33';
-ctx.fillRect(x, y > 18 ? y - 18 : y, tw, 18);
-ctx.fillStyle = color;
-ctx.fillText(text, x + 4, y > 18 ? y - 5 : y + 13);
-}
-
-/* ── items panel ── */
-function updateItemsPanel(items) {
-itemsGrid.innerHTML = '';
-items.forEach(({ label, cat, color, conf }) => {
-const chip = document.createElement('div');
-chip.className = 'item-chip';
-chip.style.cssText = `border-color:${color}88;color:${color};background:${color}11`;
-chip.innerHTML =
-`<span class="dot" style="background:${color}"></span>` +
-`<strong>${label}</strong><span class="cat">[${cat}]</span>` +
-(conf ? `<span class="conf" style="opacity:.45;font-size:.58rem">${conf}%</span>` : '');
-itemsGrid.appendChild(chip);
-});
+function getCategory(label) {
+return CATEGORY_MAP[label.toLowerCase()] || { cat: 'Object', color: '#aaaaaa' };
 }
 
 /* ════════════════════════════════════════
-CLAUDE VISION API — analyse one frame
-════════════════════════════════════════ */
-async function analyseFrame(base64jpeg, apiKey) {
-const prompt = `You are a computer vision system for a vending machine. Analyse this camera frame and return ONLY a JSON object, no markdown, no prose.
-
-Schema:
-{
-"faces": <integer — number of human faces visible>,
-"objects": [
-{ "label": "<object name>", "category": "<category>", "confidence": <0-100 integer>,
-"box": { "x": <0.0-1.0>, "y": <0.0-1.0>, "w": <0.0-1.0>, "h": <0.0-1.0> } }
-]
-}
-
-Rules:
-- box values are fractions of image width/height (0.0–1.0)
-- category must be one of: Person, Face, Vehicle, Animal, Food, Electronics, Furniture, Bag, Clothing, Drink, Utensil, Appliance, Sports, Plant, Default
-- include each visible face as a separate entry in objects with category "Face"
-- do NOT include "person" as a whole-body object unless the full body is clearly visible
-- list every clearly visible object, max 15 entries
-- confidence is your certainty 0-100
-- return ONLY the JSON, nothing else`;
-
-const t0 = Date.now();
-const resp = await fetch('https://api.anthropic.com/v1/messages', {
-method: 'POST',
-headers: {
-'Content-Type': 'application/json',
-'x-api-key': apiKey,
-'anthropic-version': '2023-06-01',
-'anthropic-dangerous-direct-browser-access': 'true',
-},
-body: JSON.stringify({
-model: 'claude-sonnet-4-20250514',
-max_tokens: 1000,
-messages: [{
-role: 'user',
-content: [
-{ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: base64jpeg } },
-{ type: 'text', text: prompt }
-]
-}]
-})
-});
-
-const latency = Date.now() - t0;
-dset(dLat, latency + 'ms', latency < 3000 ? 'ok' : 'warn');
-
-if (!resp.ok) {
-const err = await resp.text();
-throw new Error(`API ${resp.status}: ${err.slice(0, 120)}`);
-}
-
-const data = await resp.json();
-const raw = data.content.map(b => b.text || '').join('');
-// strip markdown fences if model ignores the instruction
-const clean = raw.replace(/```json|```/gi, '').trim();
-return JSON.parse(clean);
-}
-
-/* ════════════════════════════════════════
-CAPTURE + PROCESS ONE FRAME
-════════════════════════════════════════ */
-async function captureAndScan() {
-if (!running) return;
-const apiKey = apiKeyInput.value.trim();
-if (!apiKey) { setStatus('❌ API key required', 'error'); return; }
-
-if (video.readyState < 2 || snapCanvas.width === 0) return;
-
-frameCount++;
-dFrames.textContent = frameCount;
-
-// Draw mirrored frame to snap canvas (match the CSS mirror transform)
-const W = snapCanvas.width, H = snapCanvas.height;
-snapCtx.save();
-snapCtx.translate(W, 0); snapCtx.scale(-1, 1);
-snapCtx.drawImage(video, 0, 0, W, H);
-snapCtx.restore();
-
-// Get JPEG base64
-const base64 = snapCanvas.toDataURL('image/jpeg', 0.7).split(',')[1];
-
-// Pulse the overlay
-overlayC.classList.remove('pulsing');
-void overlayC.offsetWidth;
-overlayC.classList.add('pulsing');
-scanBar.classList.add('active');
-setStatus('🔍 Scanning frame…', 'scanning');
-
-callCount++;
-dCalls.textContent = callCount;
-dset(dApi, 'Calling Claude…', 'warn');
-
-try {
-const result = await analyseFrame(base64, apiKey);
-dset(dApi, 'OK ✓', 'ok');
-dlog(`Frame ${frameCount}: ${result.faces} faces, ${result.objects.length} objects`, 'info');
-
-ctx.clearRect(0, 0, W, H);
-const allItems = [];
-
-// Draw face boxes + collect
-const faceObjs = result.objects.filter(o => o.category === 'Face');
-faceObjs.forEach(o => {
-const bx = o.box.x * W, by = o.box.y * H, bw = o.box.w * W, bh = o.box.h * H;
-drawBox(bx, by, bw, bh, '#00ffe0', 'FACE', o.confidence);
-allItems.push({ label: 'Face', cat: 'Face', color: '#00ffe0', conf: o.confidence });
-});
-
-// Draw other objects
-result.objects.filter(o => o.category !== 'Face').forEach(o => {
-const color = catColor(o.category);
-const bx = o.box.x * W, by = o.box.y * H, bw = o.box.w * W, bh = o.box.h * H;
-drawBox(bx, by, bw, bh, color, o.label, o.confidence);
-allItems.push({ label: o.label, cat: o.category, color, conf: o.confidence });
-});
-
-const n = result.faces;
-dset(dFaces, n + ' detected', n > 0 ? 'ok' : '');
-dset(dObjs, (result.objects.length - faceObjs.length) + ' detected',
-result.objects.length - faceObjs.length > 0 ? 'ok' : '');
-
-if (n > 0) sendPhoneAlert(n);
-countEl.innerHTML = n > 0
-? `${n}<span>${n === 1 ? 'face detected' : 'faces detected'}</span>`
-: '';
-
-updateItemsPanel(allItems);
-setStatus('Camera active — scanning…', 'ok');
-} catch(e) {
-dset(dApi, 'ERROR', 'err');
-dset(dErr, e.message.slice(0, 80), '');
-dlog('API error: ' + e.message, 'err');
-setStatus('❌ ' + e.message.slice(0, 60), 'error');
-}
-
-scanBar.classList.remove('active');
-
-// Schedule next scan
-if (running) {
-const interval = parseFloat(intervalRange.value) * 1000;
-scanTimer = setTimeout(captureAndScan, interval);
-}
-}
-
-/* ════════════════════════════════════════
-CAMERA CONTROLS
+CAMERA
 ════════════════════════════════════════ */
 startBtn.addEventListener('click', async () => {
-const apiKey = apiKeyInput.value.trim();
-if (!apiKey) {
-setStatus('❌ Please enter your Anthropic API key first.', 'error');
-apiKeyInput.focus();
-return;
-}
-
 try {
 dlog('Requesting camera…', 'info');
 stream = await navigator.mediaDevices.getUserMedia({
@@ -558,10 +572,9 @@ dlog(`Camera started: ${W}×${H}`, 'info');
 running = true;
 startBtn.disabled = true;
 stopBtn.disabled = false;
-apiKeyInput.disabled = true;
+document.querySelectorAll('.mode-btn').forEach(b => b.style.pointerEvents = 'none');
 setStatus('Camera active — scanning…', 'ok');
-
-captureAndScan(); // kick off first scan
+loop();
 } catch(e) {
 const msg = e.name === 'NotAllowedError' ? 'Camera permission denied.' : e.message;
 setStatus('❌ ' + msg, 'error');
@@ -572,18 +585,184 @@ dlog('Camera error: ' + e.message, 'err');
 
 stopBtn.addEventListener('click', () => {
 running = false;
-clearTimeout(scanTimer);
+cancelAnimationFrame(animId);
 if (stream) stream.getTracks().forEach(t => t.stop());
 ctx.clearRect(0, 0, overlayC.width, overlayC.height);
 countEl.innerHTML = '';
 itemsGrid.innerHTML = '';
-scanBar.classList.remove('active');
+lastObjDetections = [];
 startBtn.disabled = false;
 stopBtn.disabled = true;
-apiKeyInput.disabled = false;
-setStatus('Stopped.');
+document.querySelectorAll('.mode-btn').forEach(b => b.style.pointerEvents = '');
+setStatus('Stopped. Select a mode and click Start Camera.');
 dlog('Stopped.', '');
 });
+
+/* ════════════════════════════════════════
+DRAW
+════════════════════════════════════════ */
+function drawBox(x, y, w, h, color, label, conf) {
+ctx.strokeStyle = color; ctx.lineWidth = 2;
+ctx.shadowColor = color; ctx.shadowBlur = 10;
+ctx.strokeRect(x, y, w, h); ctx.shadowBlur = 0;
+
+// corner accents
+const cs = 12; ctx.lineWidth = 3;
+[[x,y,1,1],[x+w,y,-1,1],[x,y+h,1,-1],[x+w,y+h,-1,-1]].forEach(([cx,cy,dx,dy]) => {
+ctx.beginPath();
+ctx.moveTo(cx+dx*cs, cy); ctx.lineTo(cx, cy); ctx.lineTo(cx, cy+dy*cs);
+ctx.stroke();
+});
+
+ctx.lineWidth = 1;
+ctx.font = 'bold 11px monospace';
+const text = conf ? `${label} ${conf}%` : label;
+const tw = ctx.measureText(text).width + 8;
+ctx.fillStyle = color + '33';
+ctx.fillRect(x, y > 18 ? y - 18 : y, tw, 18);
+ctx.fillStyle = color;
+ctx.fillText(text, x + 4, y > 18 ? y - 5 : y + 13);
+}
+
+function updateItemsPanel(items) {
+const best = {};
+items.forEach(({ label, conf, color, cat }) => {
+if (!best[label] || conf > best[label].conf) best[label] = { conf, color, cat };
+});
+itemsGrid.innerHTML = '';
+Object.entries(best).forEach(([label, { conf, color, cat }]) => {
+const chip = document.createElement('div');
+chip.className = 'item-chip';
+chip.style.cssText = `border-color:${color}88;color:${color};background:${color}11`;
+chip.innerHTML =
+`<span class="dot" style="background:${color}"></span>` +
+`<strong>${label}</strong><span class="cat">[${cat}]</span>` +
+(conf ? `<span class="conf">${conf}%</span>` : '');
+itemsGrid.appendChild(chip);
+});
+}
+
+/* ════════════════════════════════════════
+MAIN LOOP
+════════════════════════════════════════ */
+async function loop() {
+if (!running) return;
+
+if (video.readyState >= 2) {
+frameCount++;
+dFrames.textContent = frameCount;
+
+const W = overlayC.width;
+const H = overlayC.height;
+ctx.clearRect(0, 0, W, H);
+const allItems = [];
+
+/* ── MODE: Chrome Built-in ── */
+if (currentMode === 'builtin' && builtinDetector) {
+try {
+const faces = await builtinDetector.detect(video);
+dset(dFaces, faces.length + ' detected', faces.length > 0 ? 'ok' : '');
+faces.forEach(face => {
+const { x, y, width, height } = face.boundingBox;
+const mx = W - x - width;
+drawBox(mx, y, width, height, '#00ffe0', 'FACE', null);
+allItems.push({ label: 'Face', cat: 'Face', color: '#00ffe0', conf: null });
+
+// landmarks
+if (face.landmarks) {
+face.landmarks.forEach(lm => {
+ctx.beginPath();
+ctx.arc(W - lm.location.x, lm.location.y, 3, 0, Math.PI * 2);
+ctx.fillStyle = '#ff3cac';
+ctx.shadowColor = '#ff3cac'; ctx.shadowBlur = 6;
+ctx.fill(); ctx.shadowBlur = 0;
+});
+}
+});
+const n = faces.length;
+if (n > 0) sendPhoneAlert(n);
+countEl.innerHTML = n > 0 ? `${n}<span>${n === 1 ? 'face detected' : 'faces detected'}</span>` : '';
+} catch(e) {
+dset(dErr, e.message.slice(0, 80), '');
+dlog('Built-in detect error: ' + e.message, 'err');
+}
+
+/* ── MODE: face-api.js only ── */
+} else if (currentMode === 'faceapi' && faceReady) {
+try {
+snapCtx.drawImage(video, 0, 0, W, H);
+const opts = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.35 });
+const faces = await faceapi.detectAllFaces(snapCanvas, opts);
+const resized = faceapi.resizeResults(faces, { width: W, height: H });
+
+dset(dFaces, resized.length + ' detected', resized.length > 0 ? 'ok' : '');
+resized.forEach(det => {
+const { x, y, width, height } = det.box;
+const mx = W - x - width;
+const conf = Math.round(det.score * 100);
+drawBox(mx, y, width, height, '#00ffe0', 'FACE', conf);
+allItems.push({ label: 'Face', cat: 'Face', color: '#00ffe0', conf });
+});
+const n = resized.length;
+if (n > 0) sendPhoneAlert(n);
+countEl.innerHTML = n > 0 ? `${n}<span>${n === 1 ? 'face detected' : 'faces detected'}</span>` : '';
+} catch(e) {
+dset(dErr, e.message.slice(0, 80), '');
+dlog('face-api error: ' + e.message, 'err');
+}
+
+/* ── MODE: full (face + objects) ── */
+} else if (currentMode === 'full' && faceReady) {
+try {
+snapCtx.drawImage(video, 0, 0, W, H);
+
+// faces
+const opts = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.35 });
+const faces = await faceapi.detectAllFaces(snapCanvas, opts);
+const resized = faceapi.resizeResults(faces, { width: W, height: H });
+
+dset(dFaces, resized.length + ' detected', resized.length > 0 ? 'ok' : '');
+resized.forEach(det => {
+const { x, y, width, height } = det.box;
+const mx = W - x - width;
+const conf = Math.round(det.score * 100);
+drawBox(mx, y, width, height, '#00ffe0', 'FACE', conf);
+allItems.push({ label: 'Face', cat: 'Face', color: '#00ffe0', conf });
+});
+const n = resized.length;
+if (n > 0) sendPhoneAlert(n);
+countEl.innerHTML = n > 0 ? `${n}<span>${n === 1 ? 'face detected' : 'faces detected'}</span>` : '';
+
+// objects every 3rd frame
+if (frameCount % 3 === 0 && objReady && cocoModel) {
+const preds = await cocoModel.detect(snapCanvas, 10, 0.35);
+const fresh = [];
+preds.forEach(pred => {
+const label = pred.class.toLowerCase();
+if (label === 'person') return;
+const [bx, by, bw, bh] = pred.bbox;
+const mx = W - bx - bw;
+const conf = Math.round(pred.score * 100);
+const { cat, color } = getCategory(label);
+drawBox(mx, by, bw, bh, color, label, conf);
+fresh.push({ label, conf, color, cat });
+});
+lastObjDetections = fresh;
+dset(dObjs, fresh.length + ' detected', fresh.length > 0 ? 'ok' : '');
+}
+lastObjDetections.forEach(item => allItems.push(item));
+} catch(e) {
+dset(dErr, e.message.slice(0, 80), '');
+dlog('Full mode error: ' + e.message, 'err');
+}
+}
+
+updateItemsPanel(allItems);
+}
+
+animId = requestAnimationFrame(loop);
+}
 </script>
+
 </body>
 </html>
