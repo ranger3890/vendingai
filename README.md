@@ -1,4 +1,4 @@
-[face-scan.html](https://github.com/user-attachments/files/26042021/face-scan.html)
+[face-scan.html](https://github.com/user-attachments/files/26042088/face-scan.html)
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -89,8 +89,7 @@ button:disabled::before { display:none; }
   padding: 0.8rem 1rem; min-height: 52px;
 }
 #items-grid:empty::after {
-  content: 'No items detected yet.'; color: var(--dim);
-  font-size: 0.68rem;
+  content: 'No items detected yet.'; color: var(--dim); font-size: 0.68rem;
 }
 .item-chip {
   display: flex; align-items: center; gap: 0.4rem;
@@ -185,7 +184,7 @@ const itemsGrid = document.getElementById('items-grid');
 let stream = null, running = false, animId = null;
 let faceReady = false, objReady = false, cocoModel = null;
 let lastNotifTime = 0, frameCount = 0;
-let lastObjDetections = []; // persisted between frames
+let lastObjDetections = []; // cache: persisted between non-detection frames
 
 const NTFY_TOPIC = 'myfacealert123';
 const FACE_MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
@@ -305,7 +304,10 @@ async function sendPhoneAlert(count) {
 
 /* ── model loading ── */
 function checkReady() {
-  if (faceReady && objReady) { setStatus('Models ready — click Start Camera', 'ok'); startBtn.disabled = false; }
+  if (faceReady && objReady) {
+    setStatus('Models ready — click Start Camera', 'ok');
+    startBtn.disabled = false;
+  }
 }
 
 async function loadModels() {
@@ -324,13 +326,18 @@ async function loadModels() {
 /* ── camera ── */
 startBtn.addEventListener('click', async () => {
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: { width:640, height:480, facingMode:'user' }, audio:false });
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { width: 640, height: 480, facingMode: 'user' }, audio: false
+    });
     video.srcObject = stream;
     await video.play();
     video.addEventListener('loadedmetadata', () => {
-      overlayC.width = video.videoWidth; overlayC.height = video.videoHeight;
+      overlayC.width = video.videoWidth;
+      overlayC.height = video.videoHeight;
     }, { once: true });
-    running = true; startBtn.disabled = true; stopBtn.disabled = false;
+    running = true;
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
     setStatus('Camera active — scanning…', 'ok');
     loop();
   } catch (e) {
@@ -341,19 +348,26 @@ startBtn.addEventListener('click', async () => {
 });
 
 stopBtn.addEventListener('click', () => {
-  running = false; cancelAnimationFrame(animId);
+  running = false;
+  cancelAnimationFrame(animId);
   if (stream) stream.getTracks().forEach(t => t.stop());
   ctx.clearRect(0, 0, overlayC.width, overlayC.height);
-  countEl.innerHTML = ''; itemsGrid.innerHTML = '';
-  startBtn.disabled = false; stopBtn.disabled = true;
+  countEl.innerHTML = '';
+  itemsGrid.innerHTML = '';
+  lastObjDetections = [];
+  startBtn.disabled = false;
+  stopBtn.disabled = true;
   setStatus('Stopped.');
 });
 
 /* ── draw box helper ── */
 function drawBox(x, y, w, h, color, topLabel, conf) {
-  ctx.strokeStyle = color; ctx.lineWidth = 2;
-  ctx.shadowColor = color; ctx.shadowBlur = 10;
-  ctx.strokeRect(x, y, w, h); ctx.shadowBlur = 0;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 10;
+  ctx.strokeRect(x, y, w, h);
+  ctx.shadowBlur = 0;
   ctx.font = 'bold 11px monospace';
   const text = `${topLabel} ${conf}%`;
   const tw = ctx.measureText(text).width + 8;
@@ -365,6 +379,7 @@ function drawBox(x, y, w, h, color, topLabel, conf) {
 
 /* ── items panel ── */
 function updateItemsPanel(items) {
+  // Deduplicate: keep highest confidence per label
   const best = {};
   items.forEach(({ label, conf, color, cat }) => {
     if (!best[label] || conf > best[label].conf) best[label] = { conf, color, cat };
@@ -390,6 +405,8 @@ async function loop() {
     frameCount++;
     ctx.clearRect(0, 0, overlayC.width, overlayC.height);
     const W = overlayC.width, H = overlayC.height;
+
+    // Start with face detections for this frame
     const allItems = [];
 
     /* Face detection — every frame */
@@ -406,32 +423,33 @@ async function loop() {
       });
       const n = resized.length;
       if (n > 0) sendPhoneAlert(n);
-      countEl.innerHTML = n > 0 ? `${n}<span>${n === 1 ? 'face detected' : 'faces detected'}</span>` : '';
-    } catch { /* skip frame */ }
+      countEl.innerHTML = n > 0
+        ? `${n}<span>${n === 1 ? 'face detected' : 'faces detected'}</span>`
+        : '';
+    } catch { /* skip bad frame */ }
 
     /* Object detection — every 3rd frame (CPU-friendly for Chromebook) */
     if (frameCount % 3 === 0 && cocoModel) {
       try {
         const preds = await cocoModel.detect(video, 10, 0.40);
-        const objItems = [];
+        const fresh = [];
         preds.forEach(pred => {
           const label = pred.class.toLowerCase();
-          if (label === 'person') return; // already handled above
+          if (label === 'person') return; // faces already handled above
           const [bx, by, bw, bh] = pred.bbox;
-          const mx = W - bx - bw;
+          const mx = W - bx - bw; // mirror to match flipped video
           const conf = Math.round(pred.score * 100);
           const { cat, color } = getCategory(label);
           drawBox(mx, by, bw, bh, color, label, conf);
-          objItems.push({ label, conf, color, cat });
+          fresh.push({ label, conf, color, cat });
         });
-        lastObjDetections = objItems;
-      } catch { /* skip */ }
-    } else {
-      // Redraw last known object boxes from stored data (no bbox — just panel)
-      lastObjDetections.forEach(item => allItems.push(item));
+        lastObjDetections = fresh; // update cache only on detection frames
+      } catch { /* skip bad frame */ }
     }
 
+    // Always merge cached object results into this frame's item list (FIX: was added twice before)
     lastObjDetections.forEach(item => allItems.push(item));
+
     updateItemsPanel(allItems);
   }
 
